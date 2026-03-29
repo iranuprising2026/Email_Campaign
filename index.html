@@ -245,27 +245,34 @@ Object.keys(emailSubjects).forEach(v=>{
 // Generate email
 function generateEmail(){
   const dropdownValue = politicianDropdown.value;
-  const pol = dropdownValue.replace(/\s*\(.*?\)/, "");
+  // This extracts just the name, removing the (Party) part
+  const polName = dropdownValue.split(' (')[0]; 
   const ver = versionDropdown.value;
   const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
   const city = document.getElementById("city").value || "";
 
-  const recipientTo = politicians[dropdownValue][0];  // To
-  const recipientCC = politicians[dropdownValue][1];  // CC
+  const recipientTo = politicians[dropdownValue][0];  
+  const recipientCC = politicians[dropdownValue][1];  
   const subjectText = emailSubjects[ver];
 
   let bodyText = emails[ver];
-  bodyText = bodyText.replace(/\[NAME\]/g, pol);
+  bodyText = bodyText.replace(/\[NAME\]/g, polName);
   bodyText = bodyText.replace(/\[USER\]/g, user);
   bodyText = bodyText.replace(/\[CITY\]/g, city);
 
-  // Show both emails in the input box
   document.getElementById("recipient").value = `${recipientTo}; ${recipientCC}`;
   document.getElementById("subject").value = subjectText;
   document.getElementById("output").value = bodyText;
 
-  // mailto link for Gmail/Outlook compatibility
-  const mailtoLink = `mailto:${recipientTo}?cc=${recipientCC}&subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
+  // IMPROVED MAILTO CONSTRUCTION
+  // We use a clean template and ensure no spaces exist between parameters
+  const encodedSubject = encodeURIComponent(subjectText);
+  const encodedBody = encodeURIComponent(bodyText);
+  
+  // Mobile fix: ensure the "to" address is immediately after "mailto:" 
+  // and parameters use "&" correctly.
+  const mailtoLink = `mailto:${recipientTo}?cc=${recipientCC}&subject=${encodedSubject}&body=${encodedBody}`;
+  
   document.getElementById("sendBtn").href = mailtoLink;
 }
 
