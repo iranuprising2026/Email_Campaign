@@ -2,90 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Email Dutch Politicians</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
-h2 { text-align: center; }
-p.instructions { background-color: #f0f4f8; padding: 10px; border-radius: 5px; font-size: 14px; }
-select, textarea, input, button { width: 100%; margin: 5px 0; padding: 8px; font-size: 14px; }
-textarea { resize: vertical; }
-button { cursor: pointer; background-color: #2b6cb0; color: white; border: none; border-radius: 4px; }
-button:hover { background-color: #2c5282; }
+body {
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 16px;
+  background: linear-gradient(to bottom right, #f7fafc, #e6f0ff);
+}
+
+h2 {
+  text-align: center;
+  color: #1a365d;
+}
+
+.instructions {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  line-height: 1.5;
+}
+
+select, textarea, input, button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+
+button {
+  background: linear-gradient(to right, #2b6cb0, #2c5282);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+textarea { min-height: 200px; }
+
+.chart-container {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
 </style>
 </head>
+
 <body>
 
 <h2>Email Dutch Politicians</h2>
+
 <p class="instructions">
-Instructions: First, choose a politician from the dropdown (party names are for your reference). Then select a version of the email (choose randomly or your preference). You can send via your email app or manually by copying the text. You can also edit the text, subject, or recipient before sending.
+<strong>Instructions:</strong><br>
+Choose a politician and version → Generate → Send or Copy.<br>
+📊 Tip: Choose less-used options for more impact.<br><br>
+<hr>
+<strong>دستورالعمل:</strong><br>
+یک سیاستمدار و نسخه را انتخاب کنید → تولید → ارسال یا کپی.<br>
+📊 نکته: گزینه‌های کمتر استفاده‌شده را انتخاب کنید.
 </p>
 
-<label for="username">Your Name (Pen Name):</label>
-<input type="text" id="username" placeholder="An Iranian Resident in the Netherlands">
+<input id="username" placeholder="Your name">
+<input id="city" placeholder="City (optional)">
 
-<label for="city">City (optional):</label>
-<input type="text" id="city" placeholder="">
-
-<label for="politician">Politician:</label>
-<select id="politician">
-  <option>Jan Paternotte (D66)</option>
-  <option>Ruben Brekelmans (VVD)</option>
-  <option>Jesse Klaver (GL-PvdA)</option>
-  <option>Geert Wilders (PVV)</option>
-  <option>Henri Bontenbal (CDA)</option>
-  <option>Joost Eerdmans (JA21)</option>
-  <option>Lidewij de Vos (FVD)</option>
-  <option>Henk Vermeer (BBB)</option>
-  <option>Stephan van Baarle (DENK)</option>
-  <option>Chris Stoffer (SGP)</option>
-  <option>Esther Ouwehand (PvdD)</option>
-  <option>Mirjam Bikker (ChristenUnie)</option>
-  <option>Jimmy Dijk (SP)</option>
-  <option>Jan Struijs (50PLUS)</option>
-  <option>Laurens Dassen (Volt)</option>
-</select>
-
-<label for="version">Email Version:</label>
-<select id="version">
-  <option>Version 1</option>
-  <option>Version 2</option>
-  <option>Version 3</option>
-  <option>Version 4</option>
-  <option>Version 5</option>
-</select>
+<select id="politician"></select>
+<select id="version"></select>
 
 <button onclick="generateEmail()">Generate Email</button>
 
-<h3>Subject:</h3>
-<input type="text" id="subject" readonly>
+<input id="subject" readonly>
+<input id="recipient" readonly>
+<textarea id="output" readonly></textarea>
 
-<h3>Recipient Email:</h3>
-<input type="text" id="recipient" readonly>
+<a id="sendBtn"><button onclick="track('send')">Open Email App</button></a>
+<button onclick="copyAll(); track('copy')">Copy All</button>
 
-<h3>Email Body (Dutch + English):</h3>
-<textarea id="output" rows="22" readonly></textarea>
+<div class="chart-container">
+<canvas id="politicianChart"></canvas>
+</div>
 
-<br>
-<a id="sendBtn" href="#"><button>Open in Email App</button></a>
-<button onclick="copyAll()">Copy All (Subject + Recipient + Body)</button>
+<div class="chart-container">
+<canvas id="versionChart"></canvas>
+</div>
 
 <script>
+
+// DATA
 const politicians = {
-  "Jan Paternotte (D66)": "info@d66.nl",
-  "Ruben Brekelmans (VVD)": "info@vvd.nl",
-  "Jesse Klaver (GL-PvdA)": "info@groenlinks.nl",
-  "Geert Wilders (PVV)": "pvv.publiek@tweedekamer.nl",
-  "Henri Bontenbal (CDA)": "info@cda.nl",
-  "Joost Eerdmans (JA21)": "info@ja21.nl",
-  "Lidewij de Vos (FVD)": "info@fvdemocratie.nl",
-  "Henk Vermeer (BBB)": "info@bbb.nl",
-  "Stephan van Baarle (DENK)": "info@denk.nl",
-  "Chris Stoffer (SGP)": "info@sgp.nl",
-  "Esther Ouwehand (PvdD)": "info@partijvdedieren.nl",
-  "Mirjam Bikker (ChristenUnie)": "info@christenunie.nl",
-  "Jimmy Dijk (SP)": "info@sp.nl",
-  "Jan Struijs (50PLUS)": "info@50pluspartij.nl",
-  "Laurens Dassen (Volt)": "info@voltnederland.org"
+  "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
+  "Ruben Brekelmans (VVD)": ["info@vvd.nl","r.brekelmans@tweedekamer.nl"],
+  "Jesse Klaver (GL-PvdA)": ["info@groenlinks.nl","j.klaver@tweedekamer.nl"],
+  "Geert Wilders (PVV)": ["pvv.publiek@tweedekamer.nl","g.wilders@tweedekamer.nl"],
+  "Henri Bontenbal (CDA)": ["info@cda.nl","h.bontenbal@tweedekamer.nl"],
+  "Joost Eerdmans (JA21)": ["info@ja21.nl","b.eerdmans@tweedekamer.nl"],
+  "Lidewij de Vos (FVD)": ["info@fvdemocratie.nl","l.dvos@tweedekamer.nl"],
+  "Henk Vermeer (BBB)": ["info@bbb.nl","h.vermeer@tweedekamer.nl"],
+  "Stephan van Baarle (DENK)": ["info@denk.nl","s.vbaarle@tweedekamer.nl"],
+  "Chris Stoffer (SGP)": ["info@sgp.nl","c.stoffer@tweedekamer.nl"],
+  "Esther Ouwehand (PvdD)": ["info@partijvdedieren.nl","esther.ouwehand@tweedekamer.nl"],
+  "Mirjam Bikker (ChristenUnie)": ["info@christenunie.nl","m.bikker@tweedekamer.nl"],
+  "Jimmy Dijk (SP)": ["info@sp.nl","j.dijk@tweedekamer.nl"],
+  "Jan Struijs (50PLUS)": ["info@50pluspartij.nl","j.struijs@tweedekamer.nl"],
+  "Laurens Dassen (Volt)": ["info@voltnederland.org","l.dassen@tweedekamer.nl"]
 };
 
 const emailSubjects = {
@@ -96,7 +121,6 @@ const emailSubjects = {
   "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
 };
 
-// Emails with 5 versions (Dutch + English), all keeping sit-in, Jan 6-10 & Feb 14 protests, Pahlavi support, and smooth transitions
 const emails = {
   "Version 1": `Dutch:
 Geachte [NAME],
@@ -209,37 +233,85 @@ Kind regards,
 [CITY]`
 };
 
-function generateEmail() {
-  const dropdownValue = document.getElementById("politician").value; // keep full name + party
-  const pol = dropdownValue.replace(/\s*\(.*?\)/, ""); // remove party for email text
-  const ver = document.getElementById("version").value;
-  const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
-  const city = document.getElementById("city").value || "";
+// dropdown init
+Object.keys(politicians).forEach(p=>{
+  let o=document.createElement("option"); o.text=p;
+  document.getElementById("politician").add(o);
+});
 
-  const recipientEmail = politicians[dropdownValue]; // lookup uses full name + party
+["Version 1","Version 2","Version 3","Version 4","Version 5"]
+.forEach(v=>{
+  let o=document.createElement("option"); o.text=v;
+  document.getElementById("version").add(o);
+});
+
+// generate
+function generateEmail(){
+  const dropdownValue = politician.value;
+  const pol = dropdownValue.replace(/\s*\(.*?\)/,"");
+  const ver = version.value;
+  const user = username.value || "An Iranian Resident in the Netherlands";
+  const city = cityInput.value || "";
+
+  const recipient = politicians[dropdownValue].join(",");
   const subjectText = emailSubjects[ver];
 
-  let bodyText = emails[ver];
-  bodyText = bodyText.replace(/\[NAME\]/g, pol);
-  bodyText = bodyText.replace(/\[USER\]/g, user);
-  bodyText = bodyText.replace(/\[CITY\]/g, city);
+  let body = emails[ver]
+    .replace(/\[NAME\]/g, pol)
+    .replace(/\[USER\]/g, user)
+    .replace(/\[CITY\]/g, city);
 
-  document.getElementById("recipient").value = recipientEmail;
-  document.getElementById("subject").value = subjectText;
-  document.getElementById("output").value = bodyText;
+  subject.value = subjectText;
+  recipientField.value = recipient;
+  output.value = body;
 
-  const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
-  document.getElementById("sendBtn").href = mailtoLink;
+  sendBtn.href =
+    `mailto:${recipient}?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(body)}`;
 }
 
-function copyAll() {
-  const recipient = document.getElementById("recipient").value;
-  const subject = document.getElementById("subject").value;
-  const body = document.getElementById("output").value;
-  const fullText = `To: ${recipient}\nSubject: ${subject}\n\n${body}`;
-  navigator.clipboard.writeText(fullText);
-  alert("All content copied to clipboard!");
+// tracking
+function track(type){
+  let polData = JSON.parse(localStorage.getItem("pol")||"{}");
+  let verData = JSON.parse(localStorage.getItem("ver")||"{}");
+
+  polData[politician.value]=(polData[politician.value]||0)+1;
+  verData[version.value]=(verData[version.value]||0)+1;
+
+  localStorage.setItem("pol",JSON.stringify(polData));
+  localStorage.setItem("ver",JSON.stringify(verData));
+
+  updateCharts();
 }
+
+// copy
+function copyAll(){
+  navigator.clipboard.writeText(
+`To: ${recipientField.value}
+Subject: ${subject.value}
+
+${output.value}`);
+}
+
+// charts
+let pc, vc;
+function updateCharts(){
+  let polData = JSON.parse(localStorage.getItem("pol")||"{}");
+  let verData = JSON.parse(localStorage.getItem("ver")||"{}");
+
+  let polLabels = Object.keys(politicians);
+  let polValues = polLabels.map(p=>polData[p]||0);
+  let verValues = ["Version 1","Version 2","Version 3","Version 4","Version 5"]
+    .map(v=>verData[v]||0);
+
+  if(pc) pc.destroy();
+  if(vc) vc.destroy();
+
+  pc = new Chart(politicianChart,{type:'bar',data:{labels:polLabels,datasets:[{data:polValues}]}})
+  vc = new Chart(versionChart,{type:'bar',data:{labels:["Version 1","Version 2","Version 3","Version 4","Version 5"],datasets:[{data:verValues}]}})
+}
+
+updateCharts();
+
 </script>
 
 </body>
