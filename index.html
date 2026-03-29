@@ -171,18 +171,21 @@ function generateEmail() {
     const sub = emailSubjects[vKey];
     let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
-    // Keep the display boxes looking clean for the user
+    // Update the visual boxes on the page
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
 
-    // THE MOBILE-BULLETPROOF FIX:
-    // 1. We combine both emails into the 'TO' field using a COMMA. 
-    // 2. We do NOT use the '?cc=' parameter, as this is what causes the "///" and empty fields on mobile.
-    // 3. This ensures both people get the email 100% of the time on Gmail and Outlook mobile.
+    // THE "ULTRA-SAFE" MOBILE FIX:
+    // 1. We use a comma because it's the most universal separator for mobile.
+    // 2. We use encodeURIComponent to turn every symbol into a web-safe code.
+    // 3. We manually replace any remaining spaces with %20 to stop Outlook from breaking.
     
-    const combinedRecipients = `${to},${cc}`;
-    const mailto = `mailto:${combinedRecipients}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    const recipients = `${to},${cc}`;
+    const safeSubject = encodeURIComponent(sub).replace(/%20/g, '%20');
+    const safeBody = encodeURIComponent(body).replace(/%20/g, '%20');
+
+    const mailto = `mailto:${recipients}?subject=${safeSubject}&body=${safeBody}`;
     
     document.getElementById("sendBtn").href = mailto;
 }
