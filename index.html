@@ -18,7 +18,6 @@
         }
         h2 { text-align: center; color: #1a365d; }
         
-        /* Instructions Styling */
         .instruction-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         .inst-box {
             flex: 1; min-width: 280px; background: white; padding: 16px;
@@ -42,6 +41,7 @@
             margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .strategy-note { color: #2b6cb0; font-style: italic; margin-bottom: 10px; display: block; }
     </style>
 </head>
 
@@ -51,25 +51,27 @@
 
     <div class="instruction-container">
         <div class="inst-box">
-            <strong>Steps:</strong>
+            <strong>Action Steps:</strong>
+            <span class="strategy-note">Check the chart at the bottom first! Send emails to politicians with fewer counts, or choose email versions (colors) that are used less.</span>
             <ol style="padding-left: 20px; margin: 8px 0;">
                 <li>Select a politician.</li>
-                <li>Select an email version (choose any of the 5).</li>
+                <li>Select an email version (1-5).</li>
                 <li>Click "Generate Email".</li>
                 <li>Click "Open in Email App" or "Copy All" to send manually.</li>
             </ol>
-            <p class="warning-text">*If email fields appear empty in your app, please enter them manually from the boxes below.</p>
+            <p class="warning-text">*If email fields appear empty or show "///" in your app, please copy the addresses manually from the boxes below.</p>
         </div>
 
         <div class="inst-box rtl">
             <strong>مراحل اقدام:</strong>
+            <span class="strategy-note">ابتدا نمودار پایین صفحه را چک کنید! به سیاستمدارانی ایمیل بزنید که تعداد کمتری دریافت کرده‌اند یا نسخه‌هایی (رنگ‌هایی) را انتخاب کنید که کمتر استفاده شده‌اند.</span>
             <ol style="padding-right: 20px; margin: 8px 0;">
                 <li>یک سیاستمدار را انتخاب کنید.</li>
-                <li>یک نسخه ایمیل انتخاب کنید (از بین ۵ نسخه به دلخواه).</li>
+                <li>یک نسخه ایمیل انتخاب کنید (نسخه ۱ تا ۵).</li>
                 <li>روی Generate Email کلیک کنید.</li>
                 <li>روی Open in Email App یا Copy All برای ارسال دستی کلیک کنید.</li>
             </ol>
-            <p class="warning-text">*اگر آدرس‌ها در اپلیکیشن ایمیل شما خودکار ظاهر نشد، لطفاً آن‌ها را به صورت دستی وارد کنید.</p>
+            <p class="warning-text">*اگر آدرس‌ها در اپلیکیشن ایمیل شما خالی است یا "///" نشان می‌دهد، لطفاً آدرس‌ها را به صورت دستی از کادرهای زیر کپی کنید.</p>
         </div>
     </div>
 
@@ -95,14 +97,14 @@
     <button onclick="copyAll()">Copy All</button>
 
     <div class="chart-container">
-        <h4 style="margin-top:0; text-align:center;">Action Tracker (Detailed by Version)</h4>
+        <h4 style="margin-top:0; text-align:center;">Live Tracker (Grouped by Version)</h4>
         <canvas id="statsChart"></canvas>
     </div>
 
 <script>
 // --- CONFIG ---
-const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
-const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
+const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE'; 
+const SUPABASE_KEY = 'PASTE_YOUR_ANON_KEY_HERE';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
@@ -131,7 +133,6 @@ const emailSubjects = {
     "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
 };
 
-// Simplified email content (Dutch + English combined as requested)
 const emails = {
     "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been on a sit-in for more than 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure of the embassy. We also urge recognition of Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
     "Version 2": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs houdt al meer dan 75 dagen een sit-in voor het Nederlandse ministerie van Buitenlandse Zaken. Ze eisen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Daarnaast verzoeken wij u ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure. Furthermore, we also urge you to recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
@@ -175,9 +176,15 @@ function generateEmail() {
     document.getElementById("subject").value = subject;
     document.getElementById("output").value = body;
 
-    // Fix for Mobile Mailto (Gmail/Outlook)
-    // We combine TO and CC into one field for maximum mobile compatibility if CC field fails
-    const mailtoLink = `mailto:${to}?cc=${cc}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // THE ULTIMATE MOBILE MAILTO FIX
+    // Use a simpler format that works on Gmail/Outlook mobile
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(body);
+    
+    // We provide both formats: some apps like 'mailto:to?cc=cc' and others like 'mailto:to,cc'
+    // This string is optimized for both Outlook and Gmail mobile.
+    const mailtoLink = `mailto:${to},${cc}?cc=${cc}&subject=${encodedSubject}&body=${encodedBody}`;
+    
     document.getElementById("sendBtn").href = mailtoLink;
 }
 
@@ -201,7 +208,6 @@ async function updateChart() {
     const labels = Object.keys(politicians);
     const versions = Object.keys(emailSubjects);
     
-    // Prepare datasets for each version
     const datasets = versions.map((v, index) => {
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
         return {
