@@ -254,7 +254,8 @@ function generateEmail(){
   const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
   const city = document.getElementById("city").value || "";
 
-  const recipientEmail = politicians[dropdownValue].join(";"); // COMMA for proper email clients
+  const recipientTo = politicians[dropdownValue][0];  // First email goes to "To"
+  const recipientCC = politicians[dropdownValue][1];  // Second email goes to "CC"
   const subjectText = emailSubjects[ver];
 
   let bodyText = emails[ver];
@@ -262,23 +263,20 @@ function generateEmail(){
   bodyText = bodyText.replace(/\[USER\]/g, user);
   bodyText = bodyText.replace(/\[CITY\]/g, city);
 
-  document.getElementById("recipient").value = recipientEmail;
+  // Show both emails in the input box for reference
+  document.getElementById("recipient").value = `${recipientTo}; ${recipientCC}`;
   document.getElementById("subject").value = subjectText;
   document.getElementById("output").value = bodyText;
 
-  const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
+  // Construct mailto link with To + CC
+  const mailtoLink = `mailto:${recipientTo}?cc=${recipientCC}&subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
   document.getElementById("sendBtn").href = mailtoLink;
 }
 
-// Copy all
+// Copy all (unchanged)
 function copyAll(){
   const recipient = document.getElementById("recipient").value;
   const subject = document.getElementById("subject").value;
   const body = document.getElementById("output").value;
   navigator.clipboard.writeText(`To: ${recipient}\nSubject: ${subject}\n\n${body}`);
 }
-
-</script>
-
-</body>
-</html>
