@@ -118,7 +118,7 @@ const emailSubjects = {
   "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
 };
 
-// Full email texts
+// Full email texts (Version 1-5)
 const emails = {
 "Version 1": `Dutch:
 Geachte [NAME],
@@ -141,7 +141,6 @@ We request that you meet the protesters outside the ministry and support the clo
 Kind regards,
 [USER]
 [CITY]`,
-
 "Version 2": `Dutch:
 Geachte [NAME],
 
@@ -163,7 +162,6 @@ We request that you meet the protesters outside the ministry and support the clo
 Kind regards,
 [USER]
 [CITY]`,
-
 "Version 3": `Dutch:
 Geachte [NAME],
 
@@ -185,7 +183,6 @@ We request that you meet the protesters and support the closure. In addition, we
 Kind regards,
 [USER]
 [CITY]`,
-
 "Version 4": `Dutch:
 Geachte [NAME],
 
@@ -207,7 +204,6 @@ We request that you meet the protesters and support the closure. Furthermore, we
 Kind regards,
 [USER]
 [CITY]`,
-
 "Version 5": `Dutch:
 Geachte [NAME],
 
@@ -254,8 +250,8 @@ function generateEmail(){
   const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
   const city = document.getElementById("city").value || "";
 
-  const recipientTo = politicians[dropdownValue][0];  // First email goes to "To"
-  const recipientCC = politicians[dropdownValue][1];  // Second email goes to "CC"
+  const recipientTo = politicians[dropdownValue][0];  // To
+  const recipientCC = politicians[dropdownValue][1];  // CC
   const subjectText = emailSubjects[ver];
 
   let bodyText = emails[ver];
@@ -263,20 +259,24 @@ function generateEmail(){
   bodyText = bodyText.replace(/\[USER\]/g, user);
   bodyText = bodyText.replace(/\[CITY\]/g, city);
 
-  // Show both emails in the input box for reference
+  // Show both emails in the input box
   document.getElementById("recipient").value = `${recipientTo}; ${recipientCC}`;
   document.getElementById("subject").value = subjectText;
   document.getElementById("output").value = bodyText;
 
-  // Construct mailto link with To + CC
+  // mailto link for Gmail/Outlook compatibility
   const mailtoLink = `mailto:${recipientTo}?cc=${recipientCC}&subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
   document.getElementById("sendBtn").href = mailtoLink;
 }
 
-// Copy all (unchanged)
+// Copy all
 function copyAll(){
   const recipient = document.getElementById("recipient").value;
   const subject = document.getElementById("subject").value;
   const body = document.getElementById("output").value;
   navigator.clipboard.writeText(`To: ${recipient}\nSubject: ${subject}\n\n${body}`);
 }
+</script>
+
+</body>
+</html>
