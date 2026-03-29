@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Email Dutch Politicians</title>
+<style>
+body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; }
+h2 { text-align: center; }
+select, textarea, input, button { width: 100%; margin: 5px 0; padding: 8px; font-size: 14px; }
+textarea { resize: vertical; }
+button { cursor: pointer; background-color: #2b6cb0; color: white; border: none; border-radius: 4px; }
+button:hover { background-color: #2c5282; }
+</style>
+</head>
+<body>
+
+<h2>Email Dutch Politicians</h2>
+
+<label for="politician">Politician:</label>
+<select id="politician">
+  <option>Jan Paternotte (D66)</option>
+  <option>Ruben Brekelmans (VVD)</option>
+  <option>Jesse Klaver (GL-PvdA)</option>
+  <option>Geert Wilders (PVV)</option>
+  <option>Henri Bontenbal (CDA)</option>
+  <option>Joost Eerdmans (JA21)</option>
+  <option>Lidewij de Vos (FVD)</option>
+  <option>Henk Vermeer (BBB)</option>
+  <option>Stephan van Baarle (DENK)</option>
+  <option>Chris Stoffer (SGP)</option>
+  <option>Esther Ouwehand (PvdD)</option>
+  <option>Mirjam Bikker (ChristenUnie)</option>
+  <option>Jimmy Dijk (SP)</option>
+  <option>Jan Struijs (50PLUS)</option>
+  <option>Laurens Dassen (Volt)</option>
+</select>
+
+<label for="version">Email Version:</label>
+<select id="version">
+  <option>Version 1</option>
+  <option>Version 2</option>
+  <option>Version 3</option>
+  <option>Version 4</option>
+  <option>Version 5</option>
+</select>
+
+<button onclick="generateEmail()">Generate Email</button>
+
+<h3>Subject:</h3>
+<input type="text" id="subject" readonly>
+
+<h3>Recipient Email:</h3>
+<input type="text" id="recipient" readonly>
+
+<h3>Email Body (Dutch + English):</h3>
+<textarea id="output" rows="20" readonly></textarea>
+
+<br>
+<a id="sendBtn" href="#"><button>Open in Email App</button></a>
+<button onclick="copyAll()">Copy All (Subject + Recipient + Body)</button>
+
+<script>
+const politicians = {
+  "Jan Paternotte (D66)": "info@d66.nl",
+  "Ruben Brekelmans (VVD)": "info@vvd.nl",
+  "Jesse Klaver (GL-PvdA)": "info@groenlinks.nl",
+  "Geert Wilders (PVV)": "pvv.publiek@tweedekamer.nl",
+  "Henri Bontenbal (CDA)": "info@cda.nl",
+  "Joost Eerdmans (JA21)": "info@ja21.nl",
+  "Lidewij de Vos (FVD)": "info@fvdemocratie.nl",
+  "Henk Vermeer (BBB)": "info@bbb.nl",
+  "Stephan van Baarle (DENK)": "info@denk.nl",
+  "Chris Stoffer (SGP)": "info@sgp.nl",
+  "Esther Ouwehand (PvdD)": "info@partijvdedieren.nl",
+  "Mirjam Bikker (ChristenUnie)": "info@christenunie.nl",
+  "Jimmy Dijk (SP)": "info@sp.nl",
+  "Jan Struijs (50PLUS)": "info@50pluspartij.nl",
+  "Laurens Dassen (Volt)": "info@voltnederland.org"
+};
+
+const emailSubjects = {
+  "Version 1": "Request for Action Regarding Iranian Sit-In Protest",
+  "Version 2": "Urgent: Closure of Islamic Republic Embassy in the Netherlands",
+  "Version 3": "Iranian Sit-In: Appeal for Embassy Closure and Support",
+  "Version 4": "Support Needed for Iranian Protest and Transitional Leadership",
+  "Version 5": "Action Requested: Iranian Sit-In and Crown Prince Recognition"
+};
+
+const emails = {
+  "Version 1": `Dutch:
+Geachte [NAME],
+
+Een groep Iraniërs voert al meer dan 75 dagen een zitactie uit voor het Nederlandse ministerie van Buitenlandse Zaken met de eis de ambassade van de Islamitische Republiek te sluiten na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten in Den Haag en Amsterdam, met niet-Iraanse deelnemers, en verspreidt valse informatie.
+
+Wij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Wij vragen tevens om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6-10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.
+
+Met vriendelijke groet,
+
+English:
+Dear [NAME],
+
+A group of Iranians has been on a sit-in for more than 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies in The Hague and Amsterdam, involving non-Iranian nationals, spreading misleading information.
+
+We request that you meet with the protesters outside the ministry and support the closure of the embassy. We also urge recognition of Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6-10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.
+
+Kind regards,`,
+
+  "Version 2": `Dutch:
+Geachte [NAME],
+
+Al meer dan 75 dagen voeren Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken met het verzoek de ambassade van de Islamitische Republiek te sluiten na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische evenementen in Den Haag en Amsterdam met niet-Iraanse deelnemers en verspreidt verkeerde informatie.
+
+Wij vragen u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij wordt gesteund door de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten in Iran (6-10 jan 2026) en buiten Iran (14 feb 2026 in München, Toronto, Los Angeles).
+
+Met vriendelijke groet,
+
+English:
+Dear [NAME],
+
+Iranians have been holding a sit-in for over 75 days outside the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy following the January 2026 massacre. The embassy organizes pro-regime and Islamist events in The Hague and Amsterdam involving non-Iranian nationals, spreading false narratives.
+
+We request that you meet the protesters and support the embassy closure. Please also recognize Crown Prince Reza Pahlavi as a transitional leader; he is supported by the majority of Iranians, as seen in million-scale protests in Iran (Jan 6-10, 2026) and abroad (Feb 14, 2026 in Munich, Toronto, Los Angeles).
+
+Kind regards,`,
+
+  "Version 3": `Dutch:
+Geachte [NAME],
+
+Iraniërs protesteren al 75 dagen voor het ministerie van Buitenlandse Zaken en vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers in Den Haag en Amsterdam en verspreidt valse informatie.
+
+Wij verzoeken u dringend de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Kroonprins Reza Pahlavi wordt erkend door de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten binnen Iran (6-10 jan 2026) en wereldwijd (14 feb 2026 in München, Toronto, Los Angeles).
+
+Met vriendelijke groet,
+
+English:
+Dear [NAME],
+
+Iranians have been protesting for 75+ days in front of the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy following the January 2026 massacre. The embassy organizes pro-regime and Islamist gatherings with non-Iranian participants in The Hague and Amsterdam, spreading false information.
+
+We urgently request that you meet the protesters and support the closure of the embassy. Crown Prince Reza Pahlavi is recognized by the majority of Iranians, as witnessed by million-scale protests inside Iran (Jan 6-10, 2026) and abroad (Feb 14, 2026 in Munich, Toronto, Los Angeles).
+
+Kind regards,`,
+
+  "Version 4": `Dutch:
+Geachte [NAME],
+
+Al meer dan 75 dagen voeren Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken om de sluiting van de ambassade van de Islamitische Republiek te eisen na het bloedbad van januari 2026. De ambassade blijft pro-regime en islamistische bijeenkomsten organiseren met niet-Iraanse deelnemers in Den Haag en Amsterdam.
+
+Wij verzoeken u de demonstranten te ontmoeten en steun te verlenen aan de sluiting van de ambassade. Wij vragen tevens erkenning van kroonprins Reza Pahlavi als overgangsleider, gesteund door de meerderheid van de Iraniërs via miljoenenprotesten in Iran (6-10 jan 2026) en buiten Iran (14 feb 2026, München, Toronto, Los Angeles).
+
+Met vriendelijke groet,
+
+English:
+Dear [NAME],
+
+Iranians have held a sit-in outside the Ministry of Foreign Affairs for over 75 days to demand the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy continues to organize pro-regime and Islamist events with non-Iranian participants in The Hague and Amsterdam.
+
+We request that you meet the protesters and support the closure. We also urge recognition of Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as shown by million-scale protests in Iran (Jan 6-10, 2026) and abroad (Feb 14, 2026 in Munich, Toronto, Los Angeles).
+
+Kind regards,`,
+
+  "Version 5": `Dutch:
+Geachte [NAME],
+
+Iraniërs voeren al 75+ dagen een sit-in uit voor het ministerie van Buitenlandse Zaken na het bloedbad van januari 2026 en vragen de sluiting van de ambassade van de Islamitische Republiek. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers.
+
+Wij vragen u de demonstranten te ontmoeten en de ambassade te sluiten. Kroonprins Reza Pahlavi geniet brede steun van Iraniërs, bewezen door miljoenenprotesten binnen Iran (6-10 jan 2026) en wereldwijd (14 feb 2026, München, Toronto, Los Angeles).
+
+Met vriendelijke groet,
+
+English:
+Dear [NAME],
+
+Iranians have been holding a sit-in outside the Ministry of Foreign Affairs for over 75 days following the January 2026 massacre, requesting the closure of the Islamic Republic embassy. The embassy organizes pro-regime and Islamist gatherings with non-Iranian participants.
+
+We ask that you meet the protesters and support the closure. Crown Prince Reza Pahlavi has widespread support among Iranians, as shown by million-scale protests inside Iran (Jan 6-10, 2026) and abroad (Feb 14, 2026 in Munich, Toronto, Los Angeles).
+
+Kind regards,`
+};
+
+function generateEmail() {
+  const pol = document.getElementById("politician").value;
+  const ver = document.getElementById("version").value;
+
+  const recipientEmail = politicians[pol];
+  const subjectText = emailSubjects[ver];
+
+  let bodyText = emails[ver];
+  bodyText = bodyText.replace(/\[NAME\]/g, pol);
+
+  document.getElementById("recipient").value = recipientEmail;
+  document.getElementById("subject").value = subjectText;
+  document.getElementById("output").value = bodyText;
+
+  const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
+  document.getElementById("sendBtn").href = mailtoLink;
+}
+
+function copyAll() {
+  const recipient = document.getElementById("recipient").value;
+  const subject = document.getElementById("subject").value;
+  const body = document.getElementById("output").value;
+  const fullText = `To: ${recipient}\nSubject: ${subject}\n\n${body}`;
+  navigator.clipboard.writeText(fullText);
+  alert("All content copied to clipboard!");
+}
+</script>
+
+</body>
+</html>
