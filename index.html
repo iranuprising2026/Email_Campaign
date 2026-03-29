@@ -103,9 +103,11 @@
 
 <script>
 // --- CONFIG ---
-const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE'; 
-const SUPABASE_KEY = 'PASTE_YOUR_ANON_KEY_HERE';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://teukmttolowasogayqky.supabase.co'; 
+const SUPABASE_KEY = 'sb_publishable_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRldWttdHRvbG93YXNvZ2F5cWt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAzMzgzMDIsImV4cCI6MjA1NTkxNDMwMn0.Z0R4MmdNQXF6VlBvTGNKUm1iN3R2Y05VbmhPZ1BfM0Mxb0tqX0t3Y3dIOA';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
     "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
@@ -141,94 +143,74 @@ const emails = {
     "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
 };
 
-// UI Initialization
-const politicianDropdown = document.getElementById("politician");
-Object.keys(politicians).forEach(p => {
-    let o = document.createElement("option"); o.text = p; politicianDropdown.add(o);
-});
-
-const versionDropdown = document.getElementById("version");
-Object.keys(emailSubjects).forEach(v => {
-    let o = document.createElement("option"); o.text = v; versionDropdown.add(o);
-});
+// Populate Dropdowns
+const polDrop = document.getElementById("politician");
+Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
+const verDrop = document.getElementById("version");
+Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; verDrop.add(o); });
 
 // Tracking
 async function recordAction(type) {
-    const pol = politicianDropdown.value;
-    const ver = versionDropdown.value;
-    await supabaseClient.from('email_stats').insert([{ politician_name: pol, version_name: ver, action_type: type }]);
-    updateChart();
+    const p = polDrop.value;
+    const v = verDrop.value;
+    try {
+        await supabaseClient.from('email_stats').insert([{ politician_name: p, version_name: v, action_type: type }]);
+        updateChart();
+    } catch (e) { console.error(e); }
 }
 
 function generateEmail() {
-    const dropdownValue = politicianDropdown.value;
-    const polName = dropdownValue.split(' (')[0];
-    const ver = versionDropdown.value;
+    const pKey = polDrop.value;
+    const polName = pKey.split(' (')[0];
+    const vKey = verDrop.value;
     const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
     const city = document.getElementById("city").value || "";
 
-    const to = politicians[dropdownValue][0];
-    const cc = politicians[dropdownValue][1];
-    const subject = emailSubjects[ver];
-    let body = emails[ver].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
+    const to = politicians[pKey][0];
+    const cc = politicians[pKey][1];
+    const sub = emailSubjects[vKey];
+    let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
     document.getElementById("recipient").value = `${to}; ${cc}`;
-    document.getElementById("subject").value = subject;
+    document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
 
-    // THE ULTIMATE MOBILE MAILTO FIX
-    // Use a simpler format that works on Gmail/Outlook mobile
-    const encodedSubject = encodeURIComponent(subject);
-    const encodedBody = encodeURIComponent(body);
-    
-    // We provide both formats: some apps like 'mailto:to?cc=cc' and others like 'mailto:to,cc'
-    // This string is optimized for both Outlook and Gmail mobile.
-    const mailtoLink = `mailto:${to},${cc}?cc=${cc}&subject=${encodedSubject}&body=${encodedBody}`;
-    
-    document.getElementById("sendBtn").href = mailtoLink;
+    // Mobile Fix
+    const mailto = `mailto:${to},${cc}?cc=${cc}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    document.getElementById("sendBtn").href = mailto;
 }
 
 function copyAll() {
-    const recipient = document.getElementById("recipient").value;
-    const subject = document.getElementById("subject").value;
-    const body = document.getElementById("output").value;
-    if(!subject) { alert("Please generate an email first!"); return; }
-
-    navigator.clipboard.writeText(`To: ${recipient}\nSubject: ${subject}\n\n${body}`);
+    const r = document.getElementById("recipient").value;
+    const s = document.getElementById("subject").value;
+    const b = document.getElementById("output").value;
+    if(!s) return alert("Generate email first!");
+    navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
     recordAction('Copy All');
-    alert("Copied to clipboard and tracked!");
+    alert("Copied!");
 }
 
-// Chart Logic
 let myChart;
 async function updateChart() {
-    const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
-    if (error) return;
-
-    const labels = Object.keys(politicians);
-    const versions = Object.keys(emailSubjects);
-    
-    const datasets = versions.map((v, index) => {
+    try {
+        const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
+        if (error) throw error;
+        const labels = Object.keys(politicians);
+        const versions = Object.keys(emailSubjects);
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
-        return {
+        const datasets = versions.map((v, i) => ({
             label: v,
-            data: labels.map(p => data.filter(row => row.politician_name === p && row.version_name === v).length),
-            backgroundColor: colors[index]
-        };
-    });
-
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    if (myChart) myChart.destroy();
-
-    myChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
-        options: {
-            responsive: true,
-            scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } },
-            plugins: { legend: { position: 'bottom' } }
-        }
-    });
+            data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
+            backgroundColor: colors[i]
+        }));
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
+            options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    } catch (e) { console.error(e); }
 }
 
 window.onload = updateChart;
