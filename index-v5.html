@@ -71,29 +71,29 @@ Instructions: First, choose a politician from the dropdown (party names are for 
 
 <script>
 const politicians = {
-  "Jan Paternotte": "info@d66.nl",
-  "Ruben Brekelmans": "info@vvd.nl",
-  "Jesse Klaver": "info@groenlinks.nl",
-  "Geert Wilders": "pvv.publiek@tweedekamer.nl",
-  "Henri Bontenbal": "info@cda.nl",
-  "Joost Eerdmans": "info@ja21.nl",
-  "Lidewij de Vos": "info@fvdemocratie.nl",
-  "Henk Vermeer": "info@bbb.nl",
-  "Stephan van Baarle": "info@denk.nl",
-  "Chris Stoffer": "info@sgp.nl",
-  "Esther Ouwehand": "info@partijvdedieren.nl",
-  "Mirjam Bikker": "info@christenunie.nl",
-  "Jimmy Dijk": "info@sp.nl",
-  "Jan Struijs": "info@50pluspartij.nl",
-  "Laurens Dassen": "info@voltnederland.org"
+  "Jan Paternotte (D66)": "info@d66.nl",
+  "Ruben Brekelmans (VVD)": "info@vvd.nl",
+  "Jesse Klaver (GL-PvdA)": "info@groenlinks.nl",
+  "Geert Wilders (PVV)": "pvv.publiek@tweedekamer.nl",
+  "Henri Bontenbal (CDA)": "info@cda.nl",
+  "Joost Eerdmans (JA21)": "info@ja21.nl",
+  "Lidewij de Vos (FVD)": "info@fvdemocratie.nl",
+  "Henk Vermeer (BBB)": "info@bbb.nl",
+  "Stephan van Baarle (DENK)": "info@denk.nl",
+  "Chris Stoffer (SGP)": "info@sgp.nl",
+  "Esther Ouwehand (PvdD)": "info@partijvdedieren.nl",
+  "Mirjam Bikker (ChristenUnie)": "info@christenunie.nl",
+  "Jimmy Dijk (SP)": "info@sp.nl",
+  "Jan Struijs (50PLUS)": "info@50pluspartij.nl",
+  "Laurens Dassen (Volt)": "info@voltnederland.org"
 };
 
 const emailSubjects = {
   "Version 1": "Request for Action Regarding Iranian Sit-In Protest",
   "Version 2": "Urgent: Support Iranian Sit-In Protest",
-  "Version 3": "Iranian Sit-in Outside Ministry – Please Support",
+  "Version 3": "Iranian Protest Outside Ministry – Please Support",
   "Version 4": "Action Needed: Iranian Sit-In and Embassy Closure",
-  "Version 5": "Support Iranian Sit-In To Close Islamic Regime Embassy"
+  "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
 };
 
 // Paraphrased versions of same email
@@ -120,6 +120,7 @@ Kind regards,
 [USER]
 [CITY]`,
 
+  // Versions 2-5 are paraphrased versions
   "Version 2": `Dutch:
 Geachte [NAME],
 
@@ -210,14 +211,13 @@ Kind regards,
 };
 
 function generateEmail() {
-  let pol = document.getElementById("politician").value;
-  // remove party name in parentheses
-  pol = pol.replace(/\s*\(.*?\)/, "");
+  const dropdownValue = document.getElementById("politician").value; // keep full name + party
+  const pol = dropdownValue.replace(/\s*\(.*?\)/, ""); // remove party for email text
   const ver = document.getElementById("version").value;
   const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
   const city = document.getElementById("city").value || "";
 
-  const recipientEmail = politicians[document.getElementById("politician").value];
+  const recipientEmail = politicians[dropdownValue]; // lookup uses full name + party
   const subjectText = emailSubjects[ver];
 
   let bodyText = emails[ver];
