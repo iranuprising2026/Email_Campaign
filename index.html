@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Email Dutch Politicians</title>
+</head>
+
+<body style="font-family: Arial; max-width: 600px; margin: auto; padding: 20px;">
+
+  <h2>Email Dutch Politicians</h2>
+
+  <label>בחר سیاستمدار:</label><br>
+  <select id="politician">
+    <option>Mark Rutte</option>
+    <option>Geert Wilders</option>
+    <option>Sigrid Kaag</option>
+  </select>
+
+  <br><br>
+
+  <label>Choose email version:</label><br>
+  <select id="version">
+    <option>Version 1</option>
+    <option>Version 2</option>
+    <option>Version 3</option>
+    <option>Version 4</option>
+    <option>Version 5</option>
+  </select>
+
+  <br><br>
+
+  <button onclick="generateEmail()">Generate Email</button>
+
+  <h3>Generated Email:</h3>
+  <textarea id="output" rows="10" style="width:100%;"></textarea>
+
+  <br><br>
+
+  <a id="sendBtn" href="#">
+    <button>Open Email App</button>
+  </a>
+
+<script>
+const politicians = {
+  "Mark Rutte": "mark.rutte@example.nl",
+  "Geert Wilders": "geert.wilders@example.nl",
+  "Sigrid Kaag": "sigrid.kaag@example.nl"
+};
+
+const emails = {
+  "Version 1": "Dear [NAME],\n\nWe are writing to inform you about the ongoing sit-in protest in front of the Dutch Ministry of Foreign Affairs, now lasting over 75 days...\n\nWe respectfully urge you to take action.\n\nKind regards,",
+
+  "Version 2": "Geachte [NAME],\n\nWij willen uw aandacht vestigen op het langdurige protest...\n\nMet vriendelijke groet,",
+
+  "Version 3": "Dear [NAME],\n\nAs concerned individuals, we wish to highlight...\n\nSincerely,",
+
+  "Version 4": "Geachte [NAME],\n\nAl meer dan 75 dagen...\n\nHoogachtend,",
+
+  "Version 5": "Dear [NAME],\n\nWe kindly ask for your attention...\n\nBest regards,"
+};
+
+function generateEmail() {
+  const pol = document.getElementById("politician").value;
+  const ver = document.getElementById("version").value;
+
+  const email = politicians[pol];
+  let text = emails[ver];
+
+  text = text.replace("[NAME]", pol);
+
+  document.getElementById("output").value = text;
+
+  const mailto = `mailto:${email}?subject=Regarding Iranian Protest&body=${encodeURIComponent(text)}`;
+  document.getElementById("sendBtn").href = mailto;
+}
+</script>
+
+</body>
+</html>
