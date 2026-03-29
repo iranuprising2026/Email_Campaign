@@ -254,7 +254,7 @@ function generateEmail(){
   const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
   const city = document.getElementById("city").value || "";
 
-  const recipientEmail = politicians[dropdownValue].join(","); // COMMA for proper email clients
+  const recipientEmail = politicians[dropdownValue].join(";"); // COMMA for proper email clients
   const subjectText = emailSubjects[ver];
 
   let bodyText = emails[ver];
