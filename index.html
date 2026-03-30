@@ -42,6 +42,9 @@
         }
         .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
         .strategy-note { color: #2b6cb0; font-style: italic; margin-bottom: 10px; display: block; }
+        
+        .button-group { display: flex; gap: 10px; margin-top: 10px; }
+        .button-group a { flex: 1; text-decoration: none; }
     </style>
 </head>
 
@@ -52,26 +55,22 @@
     <div class="instruction-container">
         <div class="inst-box">
             <strong>Action Steps:</strong>
-            <span class="strategy-note">Check the chart at the bottom first! Send emails to politicians with fewer counts, or choose email versions (colors) that are used less.</span>
+            <span class="strategy-note">Check the chart at the bottom! Choose politicians or versions with lower counts.</span>
             <ol style="padding-left: 20px; margin: 8px 0;">
-                <li>Select a politician.</li>
-                <li>Select an email version (1-5).</li>
+                <li>Select a politician & version.</li>
                 <li>Click "Generate Email".</li>
-                <li>Click "Open in Email App" or "Copy All" to send manually.</li>
+                <li>Choose the button for <b>Web</b> (Desktop) or <b>Mobile</b>.</li>
             </ol>
-            <p class="warning-text">*If email fields appear empty or show "///" in your app, please copy the addresses manually from the boxes below.</p>
         </div>
 
         <div class="inst-box rtl">
             <strong>مراحل اقدام:</strong>
-            <span class="strategy-note">ابتدا نمودار پایین صفحه را چک کنید! به سیاستمدارانی ایمیل بزنید که تعداد کمتری دریافت کرده‌اند یا نسخه‌هایی (رنگ‌هایی) را انتخاب کنید که کمتر استفاده شده‌اند.</span>
+            <span class="strategy-note">ابتدا نمودار پایین صفحه را چک کنید! به سیاستمدارانی ایمیل بزنید که تعداد کمتری دریافت کرده‌اند.</span>
             <ol style="padding-right: 20px; margin: 8px 0;">
-                <li>یک سیاستمدار را انتخاب کنید.</li>
-                <li>یک نسخه ایمیل انتخاب کنید (نسخه ۱ تا ۵).</li>
+                <li>سیاستمدار و نسخه ایمیل را انتخاب کنید.</li>
                 <li>روی Generate Email کلیک کنید.</li>
-                <li>روی Open in Email App یا Copy All برای ارسال دستی کلیک کنید.</li>
+                <li>از دکمه <b>Web</b> برای کامپیوتر یا <b>Mobile</b> برای گوشی استفاده کنید.</li>
             </ol>
-            <p class="warning-text">*اگر آدرس‌ها در اپلیکیشن ایمیل شما خالی است یا "///" نشان می‌دهد، لطفاً آدرس‌ها را به صورت دستی از کادرهای زیر کپی کنید.</p>
         </div>
     </div>
 
@@ -86,15 +85,22 @@
     <h3>Subject:</h3>
     <input id="subject" readonly>
 
-    <h3>Recipient Emails (To; CC):</h3>
+    <h3>Recipient Emails:</h3>
     <input id="recipient" readonly>
 
-    <h3>Email Body (Dutch + English):</h3>
+    <h3>Email Body:</h3>
     <textarea id="output" readonly></textarea>
 
-    <br>
-    <a id="sendBtnLink" href="#"><button id="mainSendBtn">Open in Email App</button></a>
-    <button onclick="copyAll()">Copy All</button>
+    <div class="button-group">
+        <a id="webSendBtn" href="#">
+            <button onclick="recordAction('Open Email App (Web)')">Open Email App (Web)</button>
+        </a>
+        <a id="mobileSendBtn" href="#">
+            <button onclick="recordAction('Open Email App (Mobile)')">Open Email App (Mobile)</button>
+        </a>
+    </div>
+    
+    <button onclick="copyAll()" style="background: #4a5568; margin-top: 10px;">Copy All</button>
 
     <div class="chart-container">
         <h4 style="margin-top:0; text-align:center;">Live Tracker (Grouped by Version)</h4>
@@ -102,7 +108,6 @@
     </div>
 
 <script>
-// --- CONFIG ---
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
 
@@ -143,9 +148,6 @@ const emails = {
     "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
 };
 
-// Global object to store the current email data
-let currentMail = { to: "", cc: "", sub: "", body: "" };
-
 // Populate Dropdowns
 const polDrop = document.getElementById("politician");
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
@@ -154,33 +156,14 @@ Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option
 
 // Tracking
 async function recordAction(type) {
-    const p = polDrop.value;
-    const v = verDrop.value;
     try {
-        await supabaseClient.from('email_stats').insert([{ politician_name: p, version_name: v, action_type: type }]);
+        await supabaseClient.from('email_stats').insert([{ 
+            politician_name: polDrop.value, 
+            version_name: verDrop.value, 
+            action_type: type 
+        }]);
         updateChart();
     } catch (e) { console.error(e); }
-}
-
-function generateEmail() {
-    const pKey = polDrop.value;
-    const polName = pKey.split(' (')[0];
-    const vKey = verDrop.value;
-    const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
-    const city = document.getElementById("city").value || "";
-
-    currentMail.to = politicians[pKey][0];
-    currentMail.cc = politicians[pKey][1];
-    currentMail.sub = emailSubjects[vKey];
-    currentMail.body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
-
-    document.getElementById("recipient").value = `${currentMail.to}; ${currentMail.cc}`;
-    document.getElementById("subject").value = currentMail.sub;
-    document.getElementById("output").value = currentMail.body;
-
-    // Set the link for desktop fallback immediately
-    const mailto = `mailto:${currentMail.to};${currentMail.cc}?cc=${currentMail.cc}&subject=${encodeURIComponent(currentMail.sub)}&body=${encodeURIComponent(currentMail.body)}`;
-    document.getElementById("sendBtnLink").href = mailto;
 }
 
 function generateEmail() {
@@ -195,30 +178,19 @@ function generateEmail() {
     const sub = emailSubjects[vKey];
     let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
-    // 1. Update the text boxes on the screen
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
 
-    // 2. THE FIX: Create a clean, standard mailto link
-    // We use a comma for mobile compatibility and encode everything.
-    const mailtoUrl = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-    
-    // 3. Apply the link to the <a> tag and REMOVE any javascript hijacks
-    const linkElem = document.getElementById("sendBtnLink");
-    linkElem.href = mailtoUrl;
-    linkElem.onclick = null; // This kills the "javascript:void" problem
-    
-    // 4. Update the button inside to just record the action
-    const btnElem = document.getElementById("mainSendBtn");
-    btnElem.onclick = (e) => {
-        // We don't stop the event, so the <a> link still fires
-        recordAction('Open Email App');
-    };
-}
+    const encSub = encodeURIComponent(sub);
+    const encBody = encodeURIComponent(body);
 
-// Attach the handler to the button
-document.getElementById("mainSendBtn").onclick = handleSendClick;
+    // WEB LINK (Semicolon)
+    document.getElementById("webSendBtn").href = `mailto:${to};${cc}?cc=${cc}&subject=${encSub}&body=${encBody}`;
+
+    // MOBILE LINK (Everything in CC)
+    document.getElementById("mobileSendBtn").href = `mailto:?cc=${to},${cc}&subject=${encSub}&body=${encBody}`;
+}
 
 function copyAll() {
     const r = document.getElementById("recipient").value;
