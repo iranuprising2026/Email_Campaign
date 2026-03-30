@@ -34,8 +34,8 @@
         .btn-generate { background: #2b6cb0; color: white; border: none; cursor: pointer; font-weight: bold; }
         .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .flex-row { display: flex; gap: 10px; }
-        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; border: none; }
-        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; border: none; }
+        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; border: none; height: 50px; }
+        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; border: none; height: 50px; }
         .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; border: none; }
         textarea { min-height: 200px; }
         .chart-container {
@@ -98,7 +98,7 @@
         <canvas id="statsChart"></canvas>
     </div>
 
-    <div id="version-tag">Version: 2026.03.30.07 (All recipients in To field — no CC)</div>
+    <div id="version-tag">Version: 2026.03.30.10 (Outlook Slashes Fix)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
@@ -107,21 +107,21 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-    "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
-    "Ruben Brekelmans (VVD)": ["info@vvd.nl","r.brekelmans@tweedekamer.nl"],
-    "Jesse Klaver (GL-PvdA)": ["info@groenlinks.nl","j.klaver@tweedekamer.nl"],
-    "Geert Wilders (PVV)": ["pvv.publiek@tweedekamer.nl","g.wilders@tweedekamer.nl"],
-    "Henri Bontenbal (CDA)": ["info@cda.nl","h.bontenbal@tweedekamer.nl"],
-    "Joost Eerdmans (JA21)": ["info@ja21.nl","b.eerdmans@tweedekamer.nl"],
-    "Lidewij de Vos (FVD)": ["info@fvdemocratie.nl","l.dvos@tweedekamer.nl"],
-    "Henk Vermeer (BBB)": ["info@bbb.nl","h.vermeer@tweedekamer.nl"],
-    "Stephan van Baarle (DENK)": ["info@denk.nl","s.vbaarle@tweedekamer.nl"],
-    "Chris Stoffer (SGP)": ["info@sgp.nl","c.stoffer@tweedekamer.nl"],
-    "Esther Ouwehand (PvdD)": ["info@partijvdedieren.nl","esther.ouwehand@tweedekamer.nl"],
-    "Mirjam Bikker (ChristenUnie)": ["info@christenunie.nl","m.bikker@tweedekamer.nl"],
-    "Jimmy Dijk (SP)": ["info@sp.nl","j.dijk@tweedekamer.nl"],
-    "Jan Struijs (50PLUS)": ["info@50pluspartij.nl","j.struijs@tweedekamer.nl"],
-    "Laurens Dassen (Volt)": ["info@voltnederland.org","l.dassen@tweedekamer.nl"]
+    "Jan Paternotte (D66)": ["j.paternotte@tweedekamer.nl", "info@d66.nl"],
+    "Ruben Brekelmans (VVD)": ["r.brekelmans@tweedekamer.nl", "info@vvd.nl"],
+    "Jesse Klaver (GL-PvdA)": ["j.klaver@tweedekamer.nl", "info@groenlinks.nl"],
+    "Geert Wilders (PVV)": ["g.wilders@tweedekamer.nl", "pvv.publiek@tweedekamer.nl"],
+    "Henri Bontenbal (CDA)": ["h.bontenbal@tweedekamer.nl", "info@cda.nl"],
+    "Joost Eerdmans (JA21)": ["b.eerdmans@tweedekamer.nl", "info@ja21.nl"],
+    "Lidewij de Vos (FVD)": ["l.dvos@tweedekamer.nl", "info@fvdemocratie.nl"],
+    "Henk Vermeer (BBB)": ["h.vermeer@tweedekamer.nl", "info@bbb.nl"],
+    "Stephan van Baarle (DENK)": ["s.vbaarle@tweedekamer.nl", "info@denk.nl"],
+    "Chris Stoffer (SGP)": ["c.stoffer@tweedekamer.nl", "info@sgp.nl"],
+    "Esther Ouwehand (PvdD)": ["esther.ouwehand@tweedekamer.nl", "info@partijvdedieren.nl"],
+    "Mirjam Bikker (ChristenUnie)": ["m.bikker@tweedekamer.nl", "info@christenunie.nl"],
+    "Jimmy Dijk (SP)": ["j.dijk@tweedekamer.nl", "info@sp.nl"],
+    "Jan Struijs (50PLUS)": ["j.struijs@tweedekamer.nl", "info@50pluspartij.nl"],
+    "Laurens Dassen (Volt)": ["l.dassen@tweedekamer.nl", "info@voltnederland.org"]
 };
 
 const emailSubjects = {
@@ -156,11 +156,9 @@ function generateEmail() {
     const pKey = polDrop.value;
     const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
-
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
-
-    const userFallback = "Een Iraanse inwoner in Nederland / An Iranian resident in the Netherlands";
+    const userFallback = "Een Iraanse inwoner in Nederland";
     const finalUser = rawName || userFallback;
 
     const to = politicians[pKey][0];
@@ -175,19 +173,19 @@ function generateEmail() {
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
-    alert("Generated! Now click Open Email.");
+    alert("Generated! Click Mobile or Web to send.");
 }
 
-// Opens a mailto link by clicking an invisible <a> tag.
-// This is more reliable than window.location.href on mobile browsers,
-// which can corrupt or misinterpret the mailto: URL.
 function triggerMailto(url) {
     const a = document.createElement('a');
     a.href = url;
     a.style.display = 'none';
     document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 200);
+    
+    setTimeout(() => {
+        a.click();
+        document.body.removeChild(a);
+    }, 50);
 }
 
 function openMail(mode) {
@@ -199,8 +197,11 @@ function openMail(mode) {
 
     if (!sub) return alert("Please generate email first!");
 
-    // Both addresses go in the To field, comma-separated.
-    const mailtoUrl = `mailto:${encodeURIComponent(to)},${encodeURIComponent(cc)}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    // ✅ FIX FOR OUTLOOK SLASHES:
+    // Some versions of Outlook don't like an empty path if we use the 'to=' parameter.
+    // We keep the address in the path AND the query to fix the 'Empty To' bug,
+    // but we use encodeURIComponent strictly to prevent Outlook from inserting ///.
+    const mailtoUrl = `mailto:${encodeURIComponent(to)}?to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
 
     if (mode === 'mobile') {
         triggerMailto(mailtoUrl);
