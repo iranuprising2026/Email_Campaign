@@ -31,9 +31,9 @@
         .btn-generate { background: #2b6cb0; color: white; border: none; cursor: pointer; font-weight: bold; }
         .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .flex-row { display: flex; gap: 10px; }
-        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; }
-        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; }
-        .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; }
+        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; border: none; }
+        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; border: none; }
+        .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; border: none; }
         textarea { min-height: 200px; }
         .chart-container {
             background: white; padding: 15px; border-radius: 10px;
@@ -85,7 +85,7 @@
     <div class="button-group">
         <div class="flex-row">
             <button onclick="openMail('web')" class="btn-web">1. Open Email (WEB/PC)</button>
-            <button onclick="handleMobile()" class="btn-mobile">2. Open Email (MOBILE)</button>
+            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (MOBILE)</button>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
@@ -95,10 +95,10 @@
         <canvas id="statsChart"></canvas>
     </div>
 
-    <div id="version-tag">Version: 2026.03.30.05 (Mobile Fix + Name Logic)</div>
+    <div id="version-tag">Version: 2026.03.30.06 (Mobile To-Field Fix)</div>
 
 <script>
-const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
+const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -153,19 +153,17 @@ function generateEmail() {
     const pKey = polDrop.value;
     const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
-    
-    // THE USER NAME & CITY FIX
+
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
-    
-    // If name is empty, provide BOTH descriptions in one block for the [USER] placeholder
+
     const userFallback = "Een Iraanse inwoner in Nederland / An Iranian resident in the Netherlands";
     const finalUser = rawName || userFallback;
-    
+
     const to = politicians[pKey][0];
     const cc = politicians[pKey][1];
     const sub = emailSubjects[vKey];
-    
+
     let body = (emails[vKey] || emails["Version 1"])
         .replace(/\[NAME\]/g, pName)
         .replace(/\[USER\]/g, finalUser)
@@ -177,61 +175,40 @@ function generateEmail() {
     alert("Generated! Now click Open Email.");
 }
 
-async function handleMobile() {
-    const to = politicians[polDrop.value][0];
-    const cc = politicians[polDrop.value][1];
+function buildMailtoUrl(to, cc, sub, body) {
+    // Both Gmail and Outlook on mobile support: mailto:to,cc?subject=...&body=...
+    // Putting both addresses in the "to" field ensures they appear regardless of app
+    const toField = `${to},${cc}`;
+    return `mailto:${toField}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+}
+
+function openMail(mode) {
+    const pKey = polDrop.value;
+    const to = politicians[pKey][0];
+    const cc = politicians[pKey][1];
     const sub = document.getElementById("subject").value;
     const body = document.getElementById("output").value;
 
     if (!sub) return alert("Please generate email first!");
 
-    // Attempt Native Share (Best for bypassing character limits/empty field bugs)
-    if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        try {
-            await navigator.share({
-                title: sub,
-                text: `To: ${to}, ${cc}\n\n${body}`
-            });
-            recordAction('Mobile Share');
-        } catch (err) {
-            // User cancelled or share failed, fallback to mailto
-            fallbackMailLink(to, cc, sub, body);
-        }
-    } else {
-        fallbackMailLink(to, cc, sub, body);
-    }
-}
-
-function fallbackMailLink(to, cc, sub, body) {
-    // Standard comma-separated mailto for mobile
-    const mailtoUrl = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
-    recordAction('Mobile Click');
-}
-
-function openMail(mode) {
     if (mode === 'mobile') {
-        handleMobile();
-        return;
+        // Use mailto with both addresses in To field — works in Gmail & Outlook on iOS and Android
+        const mailtoUrl = buildMailtoUrl(to, cc, sub, body);
+        window.location.href = mailtoUrl;
+        recordAction('Mobile Click');
+    } else {
+        // Web/PC: use cc= parameter so desktop clients split the addresses correctly
+        const mailtoUrl = `mailto:${to}?cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailtoUrl;
+        recordAction('Web Click');
     }
-    
-    // WEB/PC Version (Semicolon and CC parameter for Outlook)
-    const to = politicians[polDrop.value][0];
-    const cc = politicians[polDrop.value][1];
-    const sub = encodeURIComponent(document.getElementById("subject").value);
-    const body = encodeURIComponent(document.getElementById("output").value);
-    
-    if (!sub) return alert("Generate email first!");
-    
-    window.location.href = `mailto:${to}?cc=${cc}&subject=${sub}&body=${body}`;
-    recordAction('Web Click');
 }
 
 function copyAll() {
     const r = document.getElementById("recipient").value;
     const s = document.getElementById("subject").value;
     const b = document.getElementById("output").value;
-    if(!s) return alert("Generate email first!");
+    if (!s) return alert("Generate email first!");
     navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
     recordAction('Copy All');
     alert("Copied to clipboard!");
@@ -255,13 +232,13 @@ async function updateChart() {
         myChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                scales: { 
-                    x: { stacked: true }, 
-                    y: { stacked: true, beginAtZero: true } 
-                } 
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
             }
         });
     } catch (e) { console.error(e); }
