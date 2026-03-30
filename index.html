@@ -93,7 +93,7 @@
     <textarea id="output" readonly></textarea>
 
     <br>
-    <a id="sendBtn" href="#"><button onclick="recordAction('Open Email App')">Open in Email App</button></a>
+    <a id="sendBtnLink" href="#"><button id="mainSendBtn">Open in Email App</button></a>
     <button onclick="copyAll()">Copy All</button>
 
     <div class="chart-container">
@@ -143,6 +143,9 @@ const emails = {
     "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
 };
 
+// Global object to store the current email data
+let currentMail = { to: "", cc: "", sub: "", body: "" };
+
 // Populate Dropdowns
 const polDrop = document.getElementById("politician");
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
@@ -159,51 +162,55 @@ async function recordAction(type) {
     } catch (e) { console.error(e); }
 }
 
-async function generateEmail() {
+function generateEmail() {
     const pKey = polDrop.value;
     const polName = pKey.split(' (')[0];
     const vKey = verDrop.value;
     const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
     const city = document.getElementById("city").value || "";
 
-    const to = politicians[pKey][0];
-    const cc = politicians[pKey][1];
-    const sub = emailSubjects[vKey];
-    let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
+    currentMail.to = politicians[pKey][0];
+    currentMail.cc = politicians[pKey][1];
+    currentMail.sub = emailSubjects[vKey];
+    currentMail.body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
-    // Update the visual display fields
-    document.getElementById("recipient").value = `${to}; ${cc}`;
-    document.getElementById("subject").value = sub;
-    document.getElementById("output").value = body;
+    document.getElementById("recipient").value = `${currentMail.to}; ${currentMail.cc}`;
+    document.getElementById("subject").value = currentMail.sub;
+    document.getElementById("output").value = currentMail.body;
 
-    const sendBtnContainer = document.getElementById("sendBtn");
-    
-    // Check if the device supports Native Sharing (Mobile/Modern Browsers)
+    // Set the link for desktop fallback immediately
+    const mailto = `mailto:${currentMail.to};${currentMail.cc}?cc=${currentMail.cc}&subject=${encodeURIComponent(currentMail.sub)}&body=${encodeURIComponent(currentMail.body)}`;
+    document.getElementById("sendBtnLink").href = mailto;
+}
+
+// THE NEW SHARING BRAIN
+async function handleSendClick(event) {
+    if (!currentMail.sub) {
+        alert("Please click 'Generate Email' first!");
+        event.preventDefault();
+        return;
+    }
+
     if (navigator.share) {
-        // We override the button to trigger the Share Menu
-        sendBtnContainer.href = "javascript:void(0)"; 
-        sendBtnContainer.onclick = async () => {
-            try {
-                // We also record the action here
-                await recordAction('Native Share Menu Opened');
-                
-                await navigator.share({
-                    title: sub,
-                    text: body,
-                    // Note: 'url' is sometimes ignored by Gmail, so we ensure text is the priority
-                });
-            } catch (err) {
-                console.log("Share sheet closed or failed:", err);
-            }
-        };
+        // Stop the default browser link behavior
+        event.preventDefault(); 
+        try {
+            await navigator.share({
+                title: currentMail.sub,
+                text: `To: ${currentMail.to}\nCC: ${currentMail.cc}\n\n${currentMail.body}`
+            });
+            recordAction('Mobile Share Opened');
+        } catch (err) {
+            console.log("Share failed or closed", err);
+        }
     } else {
-        // DESKTOP FALLBACK (Outlook/Web Gmail)
-        // Uses the most compatible semicolon/comma mix we found for Desktop
-        const mailto = `mailto:${to};${cc}?cc=${cc}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-        sendBtnContainer.href = mailto;
-        sendBtnContainer.onclick = () => recordAction('Open Email App (Desktop)');
+        // On desktop, the <a> tag naturally triggers the mailto
+        recordAction('Open Email App (Desktop)');
     }
 }
+
+// Attach the handler to the button
+document.getElementById("mainSendBtn").onclick = handleSendClick;
 
 function copyAll() {
     const r = document.getElementById("recipient").value;
