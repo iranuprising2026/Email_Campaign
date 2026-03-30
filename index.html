@@ -183,30 +183,38 @@ function generateEmail() {
     document.getElementById("sendBtnLink").href = mailto;
 }
 
-// THE NEW SHARING BRAIN
-async function handleSendClick(event) {
-    if (!currentMail.sub) {
-        alert("Please click 'Generate Email' first!");
-        event.preventDefault();
-        return;
-    }
+function generateEmail() {
+    const pKey = polDrop.value;
+    const polName = pKey.split(' (')[0];
+    const vKey = verDrop.value;
+    const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
+    const city = document.getElementById("city").value || "";
 
-    if (navigator.share) {
-        // Stop the default browser link behavior
-        event.preventDefault(); 
-        try {
-            await navigator.share({
-                title: currentMail.sub,
-                text: `To: ${currentMail.to}\nCC: ${currentMail.cc}\n\n${currentMail.body}`
-            });
-            recordAction('Mobile Share Opened');
-        } catch (err) {
-            console.log("Share failed or closed", err);
-        }
-    } else {
-        // On desktop, the <a> tag naturally triggers the mailto
-        recordAction('Open Email App (Desktop)');
-    }
+    const to = politicians[pKey][0];
+    const cc = politicians[pKey][1];
+    const sub = emailSubjects[vKey];
+    let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
+
+    // 1. Update the text boxes on the screen
+    document.getElementById("recipient").value = `${to}; ${cc}`;
+    document.getElementById("subject").value = sub;
+    document.getElementById("output").value = body;
+
+    // 2. THE FIX: Create a clean, standard mailto link
+    // We use a comma for mobile compatibility and encode everything.
+    const mailtoUrl = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    
+    // 3. Apply the link to the <a> tag and REMOVE any javascript hijacks
+    const linkElem = document.getElementById("sendBtnLink");
+    linkElem.href = mailtoUrl;
+    linkElem.onclick = null; // This kills the "javascript:void" problem
+    
+    // 4. Update the button inside to just record the action
+    const btnElem = document.getElementById("mainSendBtn");
+    btnElem.onclick = (e) => {
+        // We don't stop the event, so the <a> link still fires
+        recordAction('Open Email App');
+    };
 }
 
 // Attach the handler to the button
