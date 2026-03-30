@@ -29,7 +29,6 @@
             border-radius: 10px; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
             font-size: 14px;
-            /* ADD THESE TWO LINES */
             color: #1e293b !important; 
             line-height: 1.5;
         }
@@ -53,7 +52,7 @@
             margin-top: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
-            height: 650px; /* Use 650px for total safety */
+            height: 650px; 
             width: 100%;
             box-sizing: border-box;
         }
@@ -63,14 +62,11 @@
             height: 100% !important;
         }
         #version-tag { font-size: 10px; color: #ccc; text-align: center; margin-top: 20px; }
-        /* This ensures "Subject:", "Recipient:", and "Preview:" are always visible */
         h3 { 
             color: #1e293b !important; 
             margin-bottom: 5px; 
             margin-top: 15px; 
         }
-
-        /* This ensures the text inside the input boxes is also dark */
         input[readonly], textarea[readonly] {
             color: #334155 !important;
         }
@@ -81,41 +77,37 @@
 
     <h2>Email Dutch Politicians</h2>
 
- <div class="instruction-container">
+    <div class="instruction-container">
         <div class="inst-box" style="border-left: 5px solid #2b6cb0;">
             <strong style="color: #2b6cb0;">Action Steps:</strong>
             <p style="margin: 5px 0; font-size: 13px; color: #4a5568;">
-                🚩 You can first check the <b>Live Action Tracker</b> below to choose politicians or email versions with lower numbers.
+                🚩 You can check the <b>Live Action Tracker</b> to choose politicians with lower numbers.
             </p>
             <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
             <strong>Steps:</strong>
             <div style="margin-top: 5px;">
-                1. Enter your Name/City (optional).<br>
-                2. Select a Politician & Version.<br>
-                3. Click <b>Generate Email Content</b>.<br>
-                4. Click <b>Mobile</b> (phone) or <b>Web</b> (PC).
+                1. Enter Name/City.<br>
+                2. Select Politician & Email Version.<br>
+                3. Click <b>Generate Content</b>.<br>
+                4. Click <b>Mobile</b> or <b>Web</b>.<br>
+                <b style="color: #c53030;">⚠️ Mobile: Use Gmail (Outlook Mobile has bugs).</b>
             </div>
-            <p style="margin-top: 10px; font-size: 12px; color: #718096; font-style: italic;">
-                * If the app doesn't open, use the <b>Copy</b> button to paste manually.
-            </p>
         </div>
 
         <div class="inst-box rtl" style="border-right: 5px solid #38a169;">
             <strong style="color: #38a169;">مراحل اقدام:</strong>
             <p style="margin: 5px 0; font-size: 13px; color: #4a5568;">
-                🚩 ابتدا می‌توانید جدول <b>Live Action Tracker</b> را در پایین صفحه چک کنید تا سیاستمداران یا نسخه‌هایی را انتخاب کنید که عدد کمتری دارند.
+                🚩 ابتدا می‌توانید نمودار پایین صفحه را چک کنید تا به سیاستمداران با تعداد ایمیل کمتر ایمیل بفرستید.
             </p>
             <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
             <strong>مراحل:</strong>
             <div style="margin-top: 5px;">
-                ۱. نام و شهر خود را وارد کنید (اختیاری).<br>
-                ۲. سیاستمدار و نسخه ایمیل را انتخاب کنید.<br>
-                ۳. دکمه <b>Generate Email Content</b> را بزنید.<br>
-                ۴. روی <b>Mobile</b> (گوشی) یا <b>Web</b> (کامپیوتر) کلیک کنید.
+                ۱. نام و شهر خود را وارد کنید.<br>
+                ۲. سیاستمدار و نسخه را انتخاب کنید.<br>
+                ۳. دکمه <b>Generate Content</b> را بزنید.<br>
+                ۴. روی <b>Mobile</b> یا <b>Web</b> کلیک کنید.<br>
+                <b style="color: #c53030;">⚠️ در موبایل حتما از برنامه Gmail استفاده کنید (Outlook باگ دارد).</b>
             </div>
-            <p style="margin-top: 10px; font-size: 12px; color: #718096; font-style: italic;">
-                * اگر برنامه ایمیل باز نشد، از دکمه <b>Copy</b> برای چسباندن دستی استفاده کنید.
-            </p>
         </div>
     </div>
 
@@ -136,25 +128,25 @@
 
     <div class="button-group">
         <div class="flex-row">
-            <button onclick="openMail('web')" class="btn-web">1. Open Email (WEB/PC)</button>
-            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (MOBILE)</button>
+            <button onclick="openMail('web')" class="btn-web">1. Open Email (OUTLOOK/PC)</button>
+            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (GMAIL/MOBILE)</button>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
 
     <div class="chart-container">
-    <div style="text-align: center; margin-bottom: 15px;">
-        <strong style="color: #1a365d; display: block; font-size: 16px;">
-            Number of Open Email / Copy to Clipboard Clicks
-        </strong>
-        <span style="color: #4a5568; display: block; font-size: 14px; margin-top: 4px;" dir="rtl">
-            تعداد دفعات باز کردن ایمیل یا کپی در کلیپ‌بورد
-        </span>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <strong style="color: #1a365d; display: block; font-size: 16px;">
+                Number of Open Email / Copy to Clipboard Clicks
+            </strong>
+            <span style="color: #4a5568; display: block; font-size: 14px; margin-top: 4px;" dir="rtl">
+                تعداد دفعات باز کردن ایمیل یا کپی در کلیپ‌بورد
+            </span>
+        </div>
+        <canvas id="statsChart"></canvas>
     </div>
-    <canvas id="statsChart"></canvas>
-</div>
 
-    <div id="version-tag">Version: 2026.03.30.10 (Outlook Slashes Fix)</div>
+    <div id="version-tag">Version: 2026.03.30.12 (Gmail Optimization)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
@@ -163,21 +155,19 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-    "Jan Paternotte (D66)": ["j.paternotte@tweedekamer.nl", "info@d66.nl"],
-    "Ruben Brekelmans (VVD)": ["r.brekelmans@tweedekamer.nl", "info@vvd.nl"],
-    "Jesse Klaver (GL-PvdA)": ["j.klaver@tweedekamer.nl", "info@groenlinks.nl"],
-    "Geert Wilders (PVV)": ["g.wilders@tweedekamer.nl", "pvv.publiek@tweedekamer.nl"],
-    "Henri Bontenbal (CDA)": ["h.bontenbal@tweedekamer.nl", "info@cda.nl"],
-    "Joost Eerdmans (JA21)": ["b.eerdmans@tweedekamer.nl", "info@ja21.nl"],
-    "Lidewij de Vos (FVD)": ["l.dvos@tweedekamer.nl", "partij@fvd.nl"],
-    "Henk Vermeer (BBB)": ["h.vermeer@tweedekamer.nl", "info@bbb.nl"],
-    "Stephan van Baarle (DENK)": ["s.vbaarle@tweedekamer.nl", "info@denk.nl"],
-    "Chris Stoffer (SGP)": ["c.stoffer@tweedekamer.nl", "info@sgp.nl"],
-    "Esther Ouwehand (PvdD)": ["esther.ouwehand@tweedekamer.nl", "info@partijvdedieren.nl"],
-    "Mirjam Bikker (ChristenUnie)": ["m.bikker@tweedekamer.nl", "info@christenunie.nl"],
-    "Jimmy Dijk (SP)": ["j.dijk@tweedekamer.nl", "info@sp.nl"],
-    "Jan Struijs (50PLUS)": ["j.struijs@tweedekamer.nl", "info@50pluspartij.nl"],
-    "Laurens Dassen (Volt)": ["l.dassen@tweedekamer.nl", "info@voltnederland.org"]
+    "Caspar Veldkamp (NSC)": ["c.veldkamp@tweedekamer.nl", "info@partijnieuwsociaalcontract.nl", "p.omtzigt@tweedekamer.nl"],
+    "Ruben Brekelmans (VVD)": ["r.brekelmans@tweedekamer.nl", "info@vvd.nl", "d.erkens@tweedekamer.nl"],
+    "Jan Paternotte (D66)": ["j.paternotte@tweedekamer.nl", "info@d66.nl", "r.jetten@tweedekamer.nl"],
+    "Jesse Klaver (GL-PvdA)": ["j.klaver@tweedekamer.nl", "info@groenlinks.nl", "f.timmermans@tweedekamer.nl"],
+    "Geert Wilders (PVV)": ["g.wilders@tweedekamer.nl", "pvv.publiek@tweedekamer.nl", "m.markuszower@tweedekamer.nl"],
+    "Laurens Dassen (Volt)": ["l.dassen@tweedekamer.nl", "info@voltnederland.org", "itshere@voltnederland.org"],
+    "Henri Bontenbal (CDA)": ["h.bontenbal@tweedekamer.nl", "info@cda.nl", "d.tuinman@tweedekamer.nl"],
+    "Chris Stoffer (SGP)": ["c.stoffer@tweedekamer.nl", "info@sgp.nl", "e.vandyke@tweedekamer.nl"],
+    "Mirjam Bikker (ChristenUnie)": ["m.bikker@tweedekamer.nl", "info@christenunie.nl", "d.grutterink@tweedekamer.nl"],
+    "Esther Ouwehand (PvdD)": ["esther.ouwehand@tweedekamer.nl", "info@partijvdedieren.nl", "f.wassenberg@tweedekamer.nl"],
+    "Joost Eerdmans (JA21)": ["b.eerdmans@tweedekamer.nl", "info@ja21.nl", "s.pouw-verweij@tweedekamer.nl"],
+    "Jimmy Dijk (SP)": ["j.dijk@tweedekamer.nl", "info@sp.nl", "s.beckerman@tweedekamer.nl"],
+    "Lidewij de Vos (FVD)": ["l.dvos@tweedekamer.nl", "partij@fvd.nl", "t.baudet@tweedekamer.nl"]
 };
 
 const emailSubjects = {
@@ -210,70 +200,49 @@ async function recordAction(type) {
 
 function generateEmail() {
     const pKey = polDrop.value;
-    const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
-
+    const pName = pKey.split(' (')[0];
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
 
-    // 1. Define the specific fallbacks for each language
     const dutchFallback = "Een Iraanse inwoner in Nederland";
     const englishFallback = "An Iranian resident in the Netherlands";
-
-    // 2. Logic: If name is empty, use language-specific fallbacks. 
-    // If name is NOT empty, use the name for both.
     const finalUserDutch = rawName || dutchFallback;
     const finalUserEnglish = rawName || englishFallback;
 
-    const to = politicians[pKey][0];
-    const cc = politicians[pKey][1];
-    const sub = emailSubjects[vKey];
-
-    // 3. We split the template handling to ensure the right name goes to the right section
     let template = (emails[vKey] || emails["Version 1"]);
-    
-    // Replace the placeholders
     let body = template.replace(/\[NAME\]/g, pName);
-    
-    // We target the Dutch section (first half) and English section (second half)
-    // Since [USER] appears twice in your templates, we replace them one by one.
-    body = body.replace("[USER]", finalUserDutch); // First occurrence (Dutch)
-    body = body.replace("[USER]", finalUserEnglish); // Second occurrence (English)
-    
-    // Replace city (if empty, it just removes the placeholder)
+    body = body.replace("[USER]", finalUserDutch);
+    body = body.replace("[USER]", finalUserEnglish);
     body = body.replace(/\[CITY\]/g, cityVal);
 
-    document.getElementById("recipient").value = `${to}; ${cc}`;
-    document.getElementById("subject").value = sub;
+    const allEmails = politicians[pKey].join("; ");
+    document.getElementById("recipient").value = allEmails;
+    document.getElementById("subject").value = emailSubjects[vKey];
     document.getElementById("output").value = body;
-    alert("Generated! Now click Open Email.");
+
+    alert("Generated! Now click Open Email or Copy.");
 }
 
 function triggerMailto(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    
-    setTimeout(() => {
-        a.click();
-        document.body.removeChild(a);
-    }, 50);
+    window.location.href = url;
 }
 
 function openMail(mode) {
     const pKey = polDrop.value;
-    const to = politicians[pKey][0];
-    const cc = politicians[pKey][1];
+    const allEmails = politicians[pKey]; 
+    const to = allEmails[0];
+    
+    // Split emails between To and CC using the original logic
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const separator = (mode === 'mobile' || isMobile) ? "," : ";";
+    const cc = allEmails.slice(1).join(separator);
+
     const sub = document.getElementById("subject").value;
     const body = document.getElementById("output").value;
 
     if (!sub) return alert("Please generate email first!");
 
-    // ✅ FIX FOR OUTLOOK SLASHES:
-    // Some versions of Outlook don't like an empty path if we use the 'to=' parameter.
-    // We keep the address in the path AND the query to fix the 'Empty To' bug,
-    // but we use encodeURIComponent strictly to prevent Outlook from inserting ///.
     const mailtoUrl = `mailto:${encodeURIComponent(to)}?to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
 
     if (mode === 'mobile') {
@@ -323,36 +292,13 @@ async function updateChart() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                // --- THE FIXES START HERE ---
-                layout: {
-                    padding: {
-                        bottom: 120, // Huge buffer so names never get cut off
-                        top: 20
-                    }
-                },
+                layout: { padding: { bottom: 120, top: 20 } },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: { color: '#1e293b' } // Visible on CodePen
-                    }
+                    legend: { display: true, position: 'top', labels: { color: '#1e293b' } }
                 },
                 scales: {
-                    x: { 
-                        stacked: true,
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 45, // Slants the names
-                            minRotation: 45,
-                            font: { size: 11 },
-                            color: '#1e293b' // Visible on CodePen
-                        }
-                    },
-                    y: { 
-                        stacked: true, 
-                        beginAtZero: true,
-                        ticks: { color: '#1e293b' } 
-                    }
+                    x: { stacked: true, ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, font: { size: 11 }, color: '#1e293b' } },
+                    y: { stacked: true, beginAtZero: true, ticks: { color: '#1e293b' } }
                 }
             }
         });
