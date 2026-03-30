@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Email Dutch Politicians</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -95,7 +98,7 @@
         <canvas id="statsChart"></canvas>
     </div>
 
-    <div id="version-tag">Version: 2026.03.30.06 (Mobile To-Field Fix)</div>
+    <div id="version-tag">Version: 2026.03.30.07 (All recipients in To field — no CC)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
@@ -175,11 +178,16 @@ function generateEmail() {
     alert("Generated! Now click Open Email.");
 }
 
-function buildMailtoUrl(to, cc, sub, body) {
-    // Both Gmail and Outlook on mobile support: mailto:to,cc?subject=...&body=...
-    // Putting both addresses in the "to" field ensures they appear regardless of app
-    const toField = `${to},${cc}`;
-    return `mailto:${toField}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+// Opens a mailto link by clicking an invisible <a> tag.
+// This is more reliable than window.location.href on mobile browsers,
+// which can corrupt or misinterpret the mailto: URL.
+function triggerMailto(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 200);
 }
 
 function openMail(mode) {
@@ -191,15 +199,14 @@ function openMail(mode) {
 
     if (!sub) return alert("Please generate email first!");
 
+    // Both addresses go in the To field, comma-separated.
+    const mailtoUrl = `mailto:${encodeURIComponent(to)},${encodeURIComponent(cc)}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+
     if (mode === 'mobile') {
-        // Use mailto with both addresses in To field — works in Gmail & Outlook on iOS and Android
-        const mailtoUrl = buildMailtoUrl(to, cc, sub, body);
-        window.location.href = mailtoUrl;
+        triggerMailto(mailtoUrl);
         recordAction('Mobile Click');
     } else {
-        // Web/PC: use cc= parameter so desktop clients split the addresses correctly
-        const mailtoUrl = `mailto:${to}?cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoUrl;
+        triggerMailto(mailtoUrl);
         recordAction('Web Click');
     }
 }
