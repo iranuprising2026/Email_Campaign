@@ -39,12 +39,15 @@
         .chart-container {
             background: white; padding: 15px; border-radius: 10px;
             margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 300px;
         }
-        .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
         .strategy-note { color: #2b6cb0; font-style: italic; margin-bottom: 10px; display: block; }
         
-        .button-group { display: flex; gap: 10px; margin-top: 10px; }
+        /* Flexbox to force buttons to stay side-by-side */
+        .button-group { display: flex; gap: 10px; margin: 15px 0; width: 100%; }
         .button-group a { flex: 1; text-decoration: none; }
+        .button-group button { height: 60px; font-size: 14px; }
+        .copy-btn { background: #4a5568 !important; }
     </style>
 </head>
 
@@ -55,21 +58,23 @@
     <div class="instruction-container">
         <div class="inst-box">
             <strong>Action Steps:</strong>
-            <span class="strategy-note">Check the chart at the bottom! Choose politicians or versions with lower counts.</span>
+            <span class="strategy-note">Check the chart at the bottom! Choose politicians with lower counts.</span>
             <ol style="padding-left: 20px; margin: 8px 0;">
                 <li>Select a politician & version.</li>
                 <li>Click "Generate Email".</li>
-                <li>Choose the button for <b>Web</b> (Desktop) or <b>Mobile</b>.</li>
+                <li><b>Web:</b> For Computer/Outlook Desktop.</li>
+                <li><b>Mobile:</b> For iPhone/Android/Gmail App.</li>
             </ol>
         </div>
 
         <div class="inst-box rtl">
             <strong>مراحل اقدام:</strong>
-            <span class="strategy-note">ابتدا نمودار پایین صفحه را چک کنید! به سیاستمدارانی ایمیل بزنید که تعداد کمتری دریافت کرده‌اند.</span>
+            <span class="strategy-note">نمودار پایین صفحه را چک کنید! به کسانی که ایمیل کمتری دارند پیام دهید.</span>
             <ol style="padding-right: 20px; margin: 8px 0;">
-                <li>سیاستمدار و نسخه ایمیل را انتخاب کنید.</li>
-                <li>روی Generate Email کلیک کنید.</li>
-                <li>از دکمه <b>Web</b> برای کامپیوتر یا <b>Mobile</b> برای گوشی استفاده کنید.</li>
+                <li>سیاستمدار و نسخه را انتخاب کنید.</li>
+                <li>Generate Email را بزنید.</li>
+                <li><b>Web:</b> برای کامپیوتر.</li>
+                <li><b>Mobile:</b> برای گوشی (اندروید و آیفون).</li>
             </ol>
         </div>
     </div>
@@ -85,32 +90,32 @@
     <h3>Subject:</h3>
     <input id="subject" readonly>
 
-    <h3>Recipient Emails:</h3>
+    <h3>Recipients:</h3>
     <input id="recipient" readonly>
 
-    <h3>Email Body:</h3>
+    <h3>Body:</h3>
     <textarea id="output" readonly></textarea>
 
     <div class="button-group">
-        <a id="webSendBtn" href="#">
-            <button onclick="recordAction('Open Email App (Web)')">Open Email App (Web)</button>
+        <a id="linkWeb" href="javascript:alert('Click Generate First')">
+            <button type="button" onclick="recordAction('Open Email App (Web)')">Open Email (Web)</button>
         </a>
-        <a id="mobileSendBtn" href="#">
-            <button onclick="recordAction('Open Email App (Mobile)')">Open Email App (Mobile)</button>
+        <a id="linkMobile" href="javascript:alert('Click Generate First')">
+            <button type="button" onclick="recordAction('Open Email App (Mobile)')">Open Email (Mobile)</button>
         </a>
     </div>
     
-    <button onclick="copyAll()" style="background: #4a5568; margin-top: 10px;">Copy All</button>
+    <button class="copy-btn" onclick="copyAll()">Copy All to Clipboard</button>
 
     <div class="chart-container">
-        <h4 style="margin-top:0; text-align:center;">Live Tracker (Grouped by Version)</h4>
+        <h4 style="margin-top:0; text-align:center;">Live Action Tracker</h4>
         <canvas id="statsChart"></canvas>
     </div>
 
 <script>
+// --- CONFIG ---
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
-
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -149,27 +154,26 @@ const emails = {
 };
 
 // Populate Dropdowns
-const polDrop = document.getElementById("politician");
-Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
-const verDrop = document.getElementById("version");
-Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; verDrop.add(o); });
+const pDrop = document.getElementById("politician");
+const vDrop = document.getElementById("version");
+Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; pDrop.add(o); });
+Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; vDrop.add(o); });
 
-// Tracking
 async function recordAction(type) {
     try {
         await supabaseClient.from('email_stats').insert([{ 
-            politician_name: polDrop.value, 
-            version_name: verDrop.value, 
+            politician_name: pDrop.value, 
+            version_name: vDrop.value, 
             action_type: type 
         }]);
         updateChart();
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Tracking Error:", e); }
 }
 
 function generateEmail() {
-    const pKey = polDrop.value;
+    const pKey = pDrop.value;
     const polName = pKey.split(' (')[0];
-    const vKey = verDrop.value;
+    const vKey = vDrop.value;
     const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
     const city = document.getElementById("city").value || "";
 
@@ -178,6 +182,7 @@ function generateEmail() {
     const sub = emailSubjects[vKey];
     let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
+    // Update Text Fields
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
@@ -185,11 +190,11 @@ function generateEmail() {
     const encSub = encodeURIComponent(sub);
     const encBody = encodeURIComponent(body);
 
-    // WEB LINK (Semicolon)
-    document.getElementById("webSendBtn").href = `mailto:${to};${cc}?cc=${cc}&subject=${encSub}&body=${encBody}`;
+    // WEB VERSION (Uses semicolon separator)
+    document.getElementById("linkWeb").href = `mailto:${to};${cc}?cc=${cc}&subject=${encSub}&body=${encBody}`;
 
-    // MOBILE LINK (Everything in CC)
-    document.getElementById("mobileSendBtn").href = `mailto:?cc=${to},${cc}&subject=${encSub}&body=${encBody}`;
+    // MOBILE VERSION (Uses CC-only trick to avoid /// errors)
+    document.getElementById("linkMobile").href = `mailto:?cc=${to},${cc}&subject=${encSub}&body=${encBody}`;
 }
 
 function copyAll() {
@@ -197,9 +202,12 @@ function copyAll() {
     const s = document.getElementById("subject").value;
     const b = document.getElementById("output").value;
     if(!s) return alert("Generate email first!");
-    navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
-    recordAction('Copy All');
-    alert("Copied!");
+    
+    const fullText = `To: ${r}\nSubject: ${s}\n\n${b}`;
+    navigator.clipboard.writeText(fullText).then(() => {
+        recordAction('Copy All');
+        alert("Copied everything to clipboard!");
+    });
 }
 
 let myChart;
@@ -207,22 +215,31 @@ async function updateChart() {
     try {
         const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
         if (error) throw error;
+        
         const labels = Object.keys(politicians);
         const versions = Object.keys(emailSubjects);
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
+        
         const datasets = versions.map((v, i) => ({
             label: v,
             data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
             backgroundColor: colors[i]
         }));
+
         const ctx = document.getElementById('statsChart').getContext('2d');
         if (myChart) myChart.destroy();
         myChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
-            options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } 
+            }
         });
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Chart Error:", e); 
+    }
 }
 
 window.onload = updateChart;
