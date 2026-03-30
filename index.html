@@ -159,7 +159,7 @@ async function recordAction(type) {
     } catch (e) { console.error(e); }
 }
 
-function generateEmail() {
+async function generateEmail() {
     const pKey = polDrop.value;
     const polName = pKey.split(' (')[0];
     const vKey = verDrop.value;
@@ -171,23 +171,38 @@ function generateEmail() {
     const sub = emailSubjects[vKey];
     let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
-    // Update the visual boxes on the page
+    // Update the visual display fields
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
 
-    // THE "ULTRA-SAFE" MOBILE FIX:
-    // 1. We use a comma because it's the most universal separator for mobile.
-    // 2. We use encodeURIComponent to turn every symbol into a web-safe code.
-    // 3. We manually replace any remaining spaces with %20 to stop Outlook from breaking.
+    const sendBtnContainer = document.getElementById("sendBtn");
     
-    const recipients = `${to},${cc}`;
-    const safeSubject = encodeURIComponent(sub).replace(/%20/g, '%20');
-    const safeBody = encodeURIComponent(body).replace(/%20/g, '%20');
-
-    const mailto = `mailto:${recipients}?subject=${safeSubject}&body=${safeBody}`;
-    
-    document.getElementById("sendBtn").href = mailto;
+    // Check if the device supports Native Sharing (Mobile/Modern Browsers)
+    if (navigator.share) {
+        // We override the button to trigger the Share Menu
+        sendBtnContainer.href = "javascript:void(0)"; 
+        sendBtnContainer.onclick = async () => {
+            try {
+                // We also record the action here
+                await recordAction('Native Share Menu Opened');
+                
+                await navigator.share({
+                    title: sub,
+                    text: body,
+                    // Note: 'url' is sometimes ignored by Gmail, so we ensure text is the priority
+                });
+            } catch (err) {
+                console.log("Share sheet closed or failed:", err);
+            }
+        };
+    } else {
+        // DESKTOP FALLBACK (Outlook/Web Gmail)
+        // Uses the most compatible semicolon/comma mix we found for Desktop
+        const mailto = `mailto:${to};${cc}?cc=${cc}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+        sendBtnContainer.href = mailto;
+        sendBtnContainer.onclick = () => recordAction('Open Email App (Desktop)');
+    }
 }
 
 function copyAll() {
