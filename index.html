@@ -62,10 +62,12 @@
             height: 100% !important;
         }
         #version-tag { font-size: 10px; color: #ccc; text-align: center; margin-top: 20px; }
-        h3 { 
+        h3, .label-bold { 
             color: #1e293b !important; 
             margin-bottom: 5px; 
             margin-top: 15px; 
+            display: block;
+            font-weight: bold;
         }
         input[readonly], textarea[readonly] {
             color: #334155 !important;
@@ -114,7 +116,10 @@
     <input id="username" placeholder="Your Name (optional)">
     <input id="city" placeholder="City (optional)">
 
+    <span class="label-bold">Choose the politician (Party)</span>
     <select id="politician"></select>
+    
+    <span class="label-bold">Choose an email version 1 to 5 (to prevent spam):</span>
     <select id="version"></select>
 
     <button class="btn-generate" onclick="generateEmail()">Generate Email Content</button>
@@ -146,7 +151,7 @@
         <canvas id="statsChart"></canvas>
     </div>
 
-    <div id="version-tag">Version: 2026.03.30.12 (Gmail Optimization)</div>
+    <div id="version-tag">Version: 2026.03.30.13 (Label Update)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
@@ -155,95 +160,82 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-
     "Caspar Veldkamp (NSC)": [
-        "c.veldkamp@tweedekamer.nl",   // ✅ Foreign affairs specialist (former diplomat)
-        "p.omtzigt@tweedekamer.nl",    // ✅ Party leader
-        "n.vandenhil@tweedekamer.nl",  // ⚠️ Real MP, defense-related
-        "info@partijnieuwsociaalcontract.nl" // ✅ Party inbox
+        "c.veldkamp@tweedekamer.nl",
+        "p.omtzigt@tweedekamer.nl",
+        "n.vandenhil@tweedekamer.nl",
+        "info@partijnieuwsociaalcontract.nl"
     ],
-
     "Ruben Brekelmans (VVD)": [
-        "r.brekelmans@tweedekamer.nl", // ✅ Defense / foreign affairs
-        "d.yesilgoz@tweedekamer.nl",   // ⚠️ Party leader (check spelling variations if bounce)
-        "s.erkens@tweedekamer.nl",     // ⚠️ Real MP (energy/international relevance)
+        "r.brekelmans@tweedekamer.nl",
+        "d.yesilgoz@tweedekamer.nl",
+        "s.erkens@tweedekamer.nl",
         "info@vvd.nl"
     ],
-
     "Jan Paternotte (D66)": [
-        "j.paternotte@tweedekamer.nl", // ✅ Foreign affairs lead
-        "s.sjoerdsma@tweedekamer.nl",  // ✅ Strong foreign affairs profile
-        "h.hammelburg@tweedekamer.nl", // ✅ International cooperation
+        "j.paternotte@tweedekamer.nl",
+        "s.sjoerdsma@tweedekamer.nl",
+        "h.hammelburg@tweedekamer.nl",
         "info@d66.nl"
     ],
-
     "Jesse Klaver (GL-PvdA)": [
         "j.klaver@tweedekamer.nl",
-        "k.piri@tweedekamer.nl",       // ✅ Top foreign affairs spokesperson
-        "s.maatoug@tweedekamer.nl",    // ✅ Real MP (REPLACED invalid Sahli)
+        "k.piri@tweedekamer.nl",
+        "s.maatoug@tweedekamer.nl",
         "info@groenlinks.nl"
     ],
-
     "Geert Wilders (PVV)": [
         "g.wilders@tweedekamer.nl",
-        "m.markuszower@tweedekamer.nl", // ✅ Security / international
-        "r.deroon@tweedekamer.nl",      // ✅ VERY strong foreign affairs veteran
+        "m.markuszower@tweedekamer.nl",
+        "r.deroon@tweedekamer.nl",
         "pvv.publiek@tweedekamer.nl"
     ],
-
     "Laurens Dassen (Volt)": [
         "l.dassen@tweedekamer.nl",
-        "n.koekkoek@tweedekamer.nl",   // ✅ EU / international law
-        "s.bamenga@tweedekamer.nl",    // ⚠️ Real MP
+        "n.koekkoek@tweedekamer.nl",
+        "s.bamenga@tweedekamer.nl",
         "info@voltnederland.org"
     ],
-
     "Henri Bontenbal (CDA)": [
         "h.bontenbal@tweedekamer.nl",
-        "d.boswijk@tweedekamer.nl",    // ✅ Defense / foreign affairs relevance
-        "p.heerma@tweedekamer.nl",     // ✅ Senior CDA figure
+        "d.boswijk@tweedekamer.nl",
+        "p.heerma@tweedekamer.nl",
         "info@cda.nl"
     ],
-
     "Chris Stoffer (SGP)": [
         "c.stoffer@tweedekamer.nl",
-        "r.bisschop@tweedekamer.nl",   // ✅ Foreign affairs veteran (IMPORTANT)
-        "k.vandermolen@tweedekamer.nl",// ⚠️ Less certain but plausible MP
+        "r.bisschop@tweedekamer.nl",
+        "k.vandermolen@tweedekamer.nl",
         "info@sgp.nl"
     ],
-
     "Mirjam Bikker (ChristenUnie)": [
         "m.bikker@tweedekamer.nl",
-        "d.ceder@tweedekamer.nl",      // ✅ Foreign affairs / human rights
-        "e.vandergraaf@tweedekamer.nl",// ⚠️ Real MP
+        "d.ceder@tweedekamer.nl",
+        "e.vandergraaf@tweedekamer.nl",
         "info@christenunie.nl"
     ],
-
     "Esther Ouwehand (PvdD)": [
         "esther.ouwehand@tweedekamer.nl",
-        "c.teunissen@tweedekamer.nl",  // ✅ International policy
-        "f.wassenberg@tweedekamer.nl", // ✅ Real MP
+        "c.teunissen@tweedekamer.nl",
+        "f.wassenberg@tweedekamer.nl",
         "info@partijvdedieren.nl"
     ],
-
     "Joost Eerdmans (JA21)": [
         "b.eerdmans@tweedekamer.nl",
-        "s.pouw-verweij@tweedekamer.nl", // ✅ Real MP
-        "j.eppink@tweedekamer.nl",       // ✅ Strong EU / foreign policy
+        "s.pouw-verweij@tweedekamer.nl",
+        "j.eppink@tweedekamer.nl",
         "info@ja21.nl"
     ],
-
     "Jimmy Dijk (SP)": [
         "j.dijk@tweedekamer.nl",
-        "j.jaspervandijk@tweedekamer.nl", // ⚠️ Former MP → MAY bounce
-        "s.beckerman@tweedekamer.nl",     // ✅ Real MP
+        "j.jaspervandijk@tweedekamer.nl",
+        "s.beckerman@tweedekamer.nl",
         "info@sp.nl"
     ],
-
     "Lidewij de Vos (FVD)": [
-        "l.dvos@tweedekamer.nl",        // ⚠️ Check: relatively new / less confirmed
-        "t.baudet@tweedekamer.nl",      // ✅ Party leader
-        "p.vanmeijeren@tweedekamer.nl", // ✅ Real MP
+        "l.dvos@tweedekamer.nl",
+        "t.baudet@tweedekamer.nl",
+        "p.vanmeijeren@tweedekamer.nl",
         "partij@fvd.nl"
     ]
 };
@@ -311,7 +303,6 @@ function openMail(mode) {
     const allEmails = politicians[pKey]; 
     const to = allEmails[0];
     
-    // Split emails between To and CC using the original logic
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const separator = (mode === 'mobile' || isMobile) ? "," : ";";
     const cc = allEmails.slice(1).join(separator);
