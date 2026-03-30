@@ -10,19 +10,18 @@
 
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; background-color: #f0f4f8; }
-        .box { background: white; padding: 20px; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         select, input, textarea, button { width: 100%; margin: 10px 0; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         
-        /* THE BUTTONS */
         .btn-generate { background: #2b6cb0; color: white; font-weight: bold; cursor: pointer; }
-        .btn-web { background: #4299e1; color: white; font-weight: bold; }
-        .btn-mobile { background: #48bb78; color: white; font-weight: bold; }
+        .btn-web { background: #2c5282; color: white; font-weight: bold; }
+        .btn-mobile { background: #38a169; color: white; font-weight: bold; }
         .btn-copy { background: #718096; color: white; }
         
         .flex-row { display: flex; gap: 10px; }
         .flex-row a { flex: 1; text-decoration: none; }
         
-        canvas { max-height: 400px; }
+        .chart-container { position: relative; height: 400px; width: 100%; }
         .rtl { direction: rtl; text-align: right; }
     </style>
 </head>
@@ -31,22 +30,16 @@
     <div class="box">
         <h2>Email Dutch Politicians</h2>
         <div class="flex-row">
-            <div style="font-size: 13px;">
-                <strong>Steps:</strong> Select Politician > Select Version > Generate > Choose Web or Mobile button.
-            </div>
-            <div class="rtl" style="font-size: 13px;">
-                <strong>مراحل:</strong> انتخاب سیاستمدار > انتخاب نسخه > زدن دکمه Generate > انتخاب دکمه وب یا موبایل.
-            </div>
+            <div style="font-size: 13px;"><strong>Steps:</strong> Generate > Choose Web or Mobile.</div>
+            <div class="rtl" style="font-size: 13px;"><strong>مراحل:</strong> بزنید Generate > انتخاب دکمه وب یا موبایل.</div>
         </div>
     </div>
 
     <div class="box">
-        <input id="user_name" placeholder="Your Name">
-        <input id="user_city" placeholder="Your City">
-        
+        <input id="user_name" placeholder="Your Name (Optional)">
+        <input id="user_city" placeholder="Your City (Optional)">
         <select id="sel_pol"></select>
         <select id="sel_ver"></select>
-        
         <button class="btn-generate" onclick="doGenerate()">1. Generate Email Content</button>
     </div>
 
@@ -59,24 +52,29 @@
         <textarea id="out_body" style="height: 150px;" readonly></textarea>
 
         <div class="flex-row">
-            <a id="lnk_web" href="javascript:void(0)" onclick="checkReady(event)">
-                <button type="button" class="btn-web">2a. Open Email (WEB)</button>
+            <a id="lnk_web" href="javascript:void(0)">
+                <button type="button" class="btn-web">2a. Open Email (WEB/PC)</button>
             </a>
-            <a id="lnk_mobile" href="javascript:void(0)" onclick="checkReady(event)">
+            <a id="lnk_mobile" href="javascript:void(0)">
                 <button type="button" class="btn-mobile">2b. Open Email (MOBILE)</button>
             </a>
         </div>
-        
-        <button class="btn-copy" onclick="doCopy()">3. Copy All to Clipboard</button>
+        <button class="btn-copy" onclick="doCopy()">3. Copy All</button>
     </div>
 
     <div class="box">
         <h4 style="text-align:center;">Action Tracker</h4>
-        <canvas id="myChart"></canvas>
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
     </div>
 
 <script>
-// --- DATA ---
+// --- CONFIG & DATA ---
+const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
+const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const politicians = {
     "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
     "Ruben Brekelmans (VVD)": ["info@vvd.nl","r.brekelmans@tweedekamer.nl"],
@@ -104,34 +102,31 @@ const subjects = {
 };
 
 const emailTexts = {
-    "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken...",
+    "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
     "Version 2": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs houdt al meer dan 75 dagen een sit-in voor het Nederlandse ministerie van Buitenlandse Zaken...",
     "Version 3": "Dutch:\nGeachte [NAME],\n\nAl meer dan 75 dagen voert een groep Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken...",
     "Version 4": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit bij het ministerie van Buitenlandse Zaken...",
     "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken..."
 };
 
-// --- INITIALIZE ---
-const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
-const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+// --- INIT UI ---
 const pSel = document.getElementById("sel_pol");
 const vSel = document.getElementById("sel_ver");
-
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; pSel.add(o); });
 Object.keys(subjects).forEach(v => { let o = document.createElement("option"); o.text = v; vSel.add(o); });
 
 let isGenerated = false;
 
-// --- FUNCTIONS ---
-async function logStats(action) {
-    await client.from('email_stats').insert([{ 
-        politician_name: pSel.value, 
-        version_name: vSel.value, 
-        action_type: action 
-    }]);
-    drawChart();
+// --- CORE LOGIC ---
+async function logStats(type) {
+    try {
+        await client.from('email_stats').insert([{ 
+            politician_name: pSel.value, 
+            version_name: vSel.value, 
+            action_type: type 
+        }]);
+        drawChart();
+    } catch (e) { console.error(e); }
 }
 
 function doGenerate() {
@@ -153,22 +148,16 @@ function doGenerate() {
     const eS = encodeURIComponent(sub);
     const eB = encodeURIComponent(body);
 
-    // Update the actual links
-    document.getElementById("lnk_web").href = `mailto:${to};${cc}?cc=${cc}&subject=${eS}&body=${eB}`;
-    document.getElementById("lnk_mobile").href = `mailto:?cc=${to},${cc}&subject=${eS}&body=${eB}`;
+    // WEB: %3B is the encoded semicolon for Outlook Desktop
+    document.getElementById("lnk_web").href = `mailto:${to}%3B${cc}?cc=${cc}&subject=${eS}&body=${eB}`;
+    document.getElementById("lnk_web").onclick = () => logStats("Web Click");
+
+    // MOBILE: Comma is safer for mobile Gmail/Outlook
+    document.getElementById("lnk_mobile").href = `mailto:${to},${cc}?cc=${cc}&subject=${eS}&body=${eB}`;
+    document.getElementById("lnk_mobile").onclick = () => logStats("Mobile Click");
     
     isGenerated = true;
-    alert("Email Generated! Now click one of the 'Open Email' buttons.");
-}
-
-function checkReady(e) {
-    if (!isGenerated) {
-        e.preventDefault();
-        alert("Please click 'Generate Email' first!");
-    } else {
-        const type = e.currentTarget.id === "lnk_web" ? "Web Click" : "Mobile Click";
-        logStats(type);
-    }
+    alert("Generated! Now click a green or blue button.");
 }
 
 function doCopy() {
@@ -182,16 +171,16 @@ function doCopy() {
 let chartObj;
 async function drawChart() {
     try {
-        const { data } = await client.from('email_stats').select('politician_name, version_name');
-        if (!data) return;
+        const { data, error } = await client.from('email_stats').select('politician_name, version_name');
+        if (error || !data) return;
 
-        const labels = Object.keys(politicians).map(l => l.split(' (')[0]);
+        const labels = Object.keys(politicians);
         const versions = Object.keys(subjects);
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
 
         const datasets = versions.map((v, i) => ({
             label: v,
-            data: Object.keys(politicians).map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
+            data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
             backgroundColor: colors[i]
         }));
 
@@ -199,10 +188,14 @@ async function drawChart() {
         if (chartObj) chartObj.destroy();
         chartObj = new Chart(ctx, {
             type: 'bar',
-            data: { labels: labels, datasets: datasets },
-            options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } 
+            }
         });
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Chart failed:", err); }
 }
 
 window.onload = drawChart;
