@@ -38,10 +38,10 @@
 
         .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .flex-row { display: flex; gap: 10px; }
-        .flex-row button, .flex-row a { flex: 1; }
+        .flex-row a { flex: 1; text-decoration: none; }
         
-        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; height: 50px; }
+        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; height: 50px; }
         .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; }
 
         textarea { min-height: 200px; }
@@ -53,7 +53,6 @@
             height: 400px;
             width: 100%;
         }
-        .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
     </style>
 </head>
 
@@ -67,10 +66,9 @@
             <ol style="padding-left: 20px; margin: 8px 0;">
                 <li>Select a politician and version.</li>
                 <li>Click <b>"Generate Email Content"</b>.</li>
-                <li><b>WEB/PC:</b> Use for Outlook Desktop.</li>
-                <li><b>MOBILE:</b> Use for Phone Apps/Sharing.</li>
+                <li><b>WEB/PC:</b> For Outlook Desktop.</li>
+                <li><b>MOBILE:</b> For phone mail apps.</li>
             </ol>
-            <p class="warning-text">*If buttons fail, use Copy All.</p>
         </div>
 
         <div class="inst-box rtl">
@@ -78,8 +76,8 @@
             <ol style="padding-right: 20px; margin: 8px 0;">
                 <li>سیاستمدار و نسخه را انتخاب کنید.</li>
                 <li>دکمه <b>"Generate Email"</b> را بزنید.</li>
-                <li><b>Web/PC:</b> برای کامپیوتر.</li>
-                <li><b>Mobile:</b> برای گوشی و اشتراک‌گذاری.</li>
+                <li><b>Web/PC:</b> برای کامپیوter.</li>
+                <li><b>Mobile:</b> برای گوشی موبایل.</li>
             </ol>
         </div>
     </div>
@@ -106,7 +104,9 @@
             <a id="lnk_web" href="javascript:void(0)">
                 <button type="button" class="btn-web">1. Open Email (WEB/PC)</button>
             </a>
-            <button type="button" class="btn-mobile" onclick="doMobileShare()">2. Open Email (MOBILE)</button>
+            <a id="lnk_mobile" href="javascript:void(0)">
+                <button type="button" class="btn-mobile">2. Open Email (MOBILE)</button>
+            </a>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
@@ -156,7 +156,6 @@ const emails = {
     "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
 };
 
-
 const polDrop = document.getElementById("politician");
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
 const verDrop = document.getElementById("version");
@@ -179,19 +178,23 @@ function generateEmail() {
     const vKey = verDrop.value;
     
     const rawName = document.getElementById("username").value.trim();
-    // Placeholder Logic
+    const cityInput = document.getElementById("city").value.trim();
+    
+    // --- FIX: REPLACE [USER] WITH PROPER STRINGS IF BLANK ---
     const userEN = rawName || "An Iranian resident in the Netherlands";
     const userDU = rawName || "Een Iraanse inwoner in Nederland";
-    const city = document.getElementById("city").value.trim() || "";
+    const city = cityInput || "";
 
     const to = politicians[pKey][0];
     const cc = politicians[pKey][1];
     const sub = emailSubjects[vKey];
     
+    // Replace all placeholders
     let body = (emails[vKey] || emails["Version 1"])
         .replace(/\[NAME\]/g, pName)
         .replace(/\[USER_DU\]/g, userDU)
         .replace(/\[USER_EN\]/g, userEN)
+        .replace(/\[USER\]/g, userEN) // Backup for old tags
         .replace(/\[CITY\]/g, city);
 
     document.getElementById("recipient").value = `${to}; ${cc}`;
@@ -201,34 +204,17 @@ function generateEmail() {
     const eS = encodeURIComponent(sub);
     const eB = encodeURIComponent(body);
 
-    // Desktop/Web Link
+    // WEB: Use Semicolon for Outlook Desktop
     const webLnk = document.getElementById("lnk_web");
     webLnk.href = `mailto:${to}%3B${cc}?subject=${eS}&body=${eB}`;
     webLnk.onclick = () => recordAction('Web Click');
+
+    // MOBILE: Use Comma for Gmail/Mobile Outlook and avoid the CC parameter which causes "///"
+    const mobLnk = document.getElementById("lnk_mobile");
+    mobLnk.href = `mailto:${to},${cc}?subject=${eS}&body=${eB}`;
+    mobLnk.onclick = () => recordAction('Mobile Click');
     
-    alert("Email Generated!");
-}
-
-function doMobileShare() {
-    const to = politicians[polDrop.value][0];
-    const cc = politicians[polDrop.value][1];
-    const sub = document.getElementById("subject").value;
-    const body = document.getElementById("output").value;
-
-    if (!sub) return alert("Please generate email first!");
-
-    // Check if browser supports Native Sharing (Modern Mobile Fix)
-    if (navigator.share) {
-        navigator.share({
-            title: sub,
-            text: `To: ${to}, ${cc}\n\n${body}`
-        }).then(() => recordAction('Mobile Share'))
-          .catch(console.error);
-    } else {
-        // Fallback for older mobile browsers
-        window.location.href = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-        recordAction('Mobile Click Fallback');
-    }
+    alert("Email Generated! Now click a button below.");
 }
 
 function copyAll() {
@@ -238,7 +224,7 @@ function copyAll() {
     if(!s) return alert("Generate email first!");
     navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
     recordAction('Copy All');
-    alert("Copied!");
+    alert("Copied to clipboard!");
 }
 
 let myChart;
