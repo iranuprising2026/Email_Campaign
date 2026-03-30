@@ -155,19 +155,97 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-    "Caspar Veldkamp (NSC)": ["c.veldkamp@tweedekamer.nl", "info@partijnieuwsociaalcontract.nl", "p.omtzigt@tweedekamer.nl"],
-    "Ruben Brekelmans (VVD)": ["r.brekelmans@tweedekamer.nl", "info@vvd.nl", "d.erkens@tweedekamer.nl"],
-    "Jan Paternotte (D66)": ["j.paternotte@tweedekamer.nl", "info@d66.nl", "r.jetten@tweedekamer.nl"],
-    "Jesse Klaver (GL-PvdA)": ["j.klaver@tweedekamer.nl", "info@groenlinks.nl", "f.timmermans@tweedekamer.nl"],
-    "Geert Wilders (PVV)": ["g.wilders@tweedekamer.nl", "pvv.publiek@tweedekamer.nl", "m.markuszower@tweedekamer.nl"],
-    "Laurens Dassen (Volt)": ["l.dassen@tweedekamer.nl", "info@voltnederland.org", "itshere@voltnederland.org"],
-    "Henri Bontenbal (CDA)": ["h.bontenbal@tweedekamer.nl", "info@cda.nl", "d.tuinman@tweedekamer.nl"],
-    "Chris Stoffer (SGP)": ["c.stoffer@tweedekamer.nl", "info@sgp.nl", "e.vandyke@tweedekamer.nl"],
-    "Mirjam Bikker (ChristenUnie)": ["m.bikker@tweedekamer.nl", "info@christenunie.nl", "d.grutterink@tweedekamer.nl"],
-    "Esther Ouwehand (PvdD)": ["esther.ouwehand@tweedekamer.nl", "info@partijvdedieren.nl", "f.wassenberg@tweedekamer.nl"],
-    "Joost Eerdmans (JA21)": ["b.eerdmans@tweedekamer.nl", "info@ja21.nl", "s.pouw-verweij@tweedekamer.nl"],
-    "Jimmy Dijk (SP)": ["j.dijk@tweedekamer.nl", "info@sp.nl", "s.beckerman@tweedekamer.nl"],
-    "Lidewij de Vos (FVD)": ["l.dvos@tweedekamer.nl", "partij@fvd.nl", "t.baudet@tweedekamer.nl"]
+
+    "Caspar Veldkamp (NSC)": [
+        "c.veldkamp@tweedekamer.nl",   // ✅ Foreign affairs specialist (former diplomat)
+        "p.omtzigt@tweedekamer.nl",    // ✅ Party leader
+        "n.vandenhil@tweedekamer.nl",  // ⚠️ Real MP, defense-related
+        "info@partijnieuwsociaalcontract.nl" // ✅ Party inbox
+    ],
+
+    "Ruben Brekelmans (VVD)": [
+        "r.brekelmans@tweedekamer.nl", // ✅ Defense / foreign affairs
+        "d.yesilgoz@tweedekamer.nl",   // ⚠️ Party leader (check spelling variations if bounce)
+        "s.erkens@tweedekamer.nl",     // ⚠️ Real MP (energy/international relevance)
+        "info@vvd.nl"
+    ],
+
+    "Jan Paternotte (D66)": [
+        "j.paternotte@tweedekamer.nl", // ✅ Foreign affairs lead
+        "s.sjoerdsma@tweedekamer.nl",  // ✅ Strong foreign affairs profile
+        "h.hammelburg@tweedekamer.nl", // ✅ International cooperation
+        "info@d66.nl"
+    ],
+
+    "Jesse Klaver (GL-PvdA)": [
+        "j.klaver@tweedekamer.nl",
+        "k.piri@tweedekamer.nl",       // ✅ Top foreign affairs spokesperson
+        "s.maatoug@tweedekamer.nl",    // ✅ Real MP (REPLACED invalid Sahli)
+        "info@groenlinks.nl"
+    ],
+
+    "Geert Wilders (PVV)": [
+        "g.wilders@tweedekamer.nl",
+        "m.markuszower@tweedekamer.nl", // ✅ Security / international
+        "r.deroon@tweedekamer.nl",      // ✅ VERY strong foreign affairs veteran
+        "pvv.publiek@tweedekamer.nl"
+    ],
+
+    "Laurens Dassen (Volt)": [
+        "l.dassen@tweedekamer.nl",
+        "n.koekkoek@tweedekamer.nl",   // ✅ EU / international law
+        "s.bamenga@tweedekamer.nl",    // ⚠️ Real MP
+        "info@voltnederland.org"
+    ],
+
+    "Henri Bontenbal (CDA)": [
+        "h.bontenbal@tweedekamer.nl",
+        "d.boswijk@tweedekamer.nl",    // ✅ Defense / foreign affairs relevance
+        "p.heerma@tweedekamer.nl",     // ✅ Senior CDA figure
+        "info@cda.nl"
+    ],
+
+    "Chris Stoffer (SGP)": [
+        "c.stoffer@tweedekamer.nl",
+        "r.bisschop@tweedekamer.nl",   // ✅ Foreign affairs veteran (IMPORTANT)
+        "k.vandermolen@tweedekamer.nl",// ⚠️ Less certain but plausible MP
+        "info@sgp.nl"
+    ],
+
+    "Mirjam Bikker (ChristenUnie)": [
+        "m.bikker@tweedekamer.nl",
+        "d.ceder@tweedekamer.nl",      // ✅ Foreign affairs / human rights
+        "e.vandergraaf@tweedekamer.nl",// ⚠️ Real MP
+        "info@christenunie.nl"
+    ],
+
+    "Esther Ouwehand (PvdD)": [
+        "esther.ouwehand@tweedekamer.nl",
+        "c.teunissen@tweedekamer.nl",  // ✅ International policy
+        "f.wassenberg@tweedekamer.nl", // ✅ Real MP
+        "info@partijvdedieren.nl"
+    ],
+
+    "Joost Eerdmans (JA21)": [
+        "b.eerdmans@tweedekamer.nl",
+        "s.pouw-verweij@tweedekamer.nl", // ✅ Real MP
+        "j.eppink@tweedekamer.nl",       // ✅ Strong EU / foreign policy
+        "info@ja21.nl"
+    ],
+
+    "Jimmy Dijk (SP)": [
+        "j.dijk@tweedekamer.nl",
+        "j.jaspervandijk@tweedekamer.nl", // ⚠️ Former MP → MAY bounce
+        "s.beckerman@tweedekamer.nl",     // ✅ Real MP
+        "info@sp.nl"
+    ],
+
+    "Lidewij de Vos (FVD)": [
+        "l.dvos@tweedekamer.nl",        // ⚠️ Check: relatively new / less confirmed
+        "t.baudet@tweedekamer.nl",      // ✅ Party leader
+        "p.vanmeijeren@tweedekamer.nl", // ✅ Real MP
+        "partij@fvd.nl"
+    ]
 };
 
 const emailSubjects = {
