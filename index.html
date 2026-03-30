@@ -85,7 +85,7 @@
     <div class="button-group">
         <div class="flex-row">
             <button onclick="openMail('web')" class="btn-web">1. Open Email (WEB/PC)</button>
-            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (MOBILE)</button>
+            <button onclick="handleMobile()" class="btn-mobile">2. Open Email (MOBILE)</button>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
@@ -95,7 +95,7 @@
         <canvas id="statsChart"></canvas>
     </div>
 
-    <div id="version-tag">Version: 2026.03.30.01</div>
+    <div id="version-tag">Version: 2026.03.30.05 (Mobile Fix + Name Logic)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
@@ -154,12 +154,13 @@ function generateEmail() {
     const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
     
-    // THE USER FIX
+    // THE USER NAME & CITY FIX
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
     
-    // Define the specific strings you requested
-    const finalUser = rawName || "An Iranian resident in the Netherlands / Een Iraanse inwoner in Nederland";
+    // If name is empty, provide BOTH descriptions in one block for the [USER] placeholder
+    const userFallback = "Een Iraanse inwoner in Nederland / An Iranian resident in the Netherlands";
+    const finalUser = rawName || userFallback;
     
     const to = politicians[pKey][0];
     const cc = politicians[pKey][1];
@@ -176,22 +177,54 @@ function generateEmail() {
     alert("Generated! Now click Open Email.");
 }
 
+async function handleMobile() {
+    const to = politicians[polDrop.value][0];
+    const cc = politicians[polDrop.value][1];
+    const sub = document.getElementById("subject").value;
+    const body = document.getElementById("output").value;
+
+    if (!sub) return alert("Please generate email first!");
+
+    // Attempt Native Share (Best for bypassing character limits/empty field bugs)
+    if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        try {
+            await navigator.share({
+                title: sub,
+                text: `To: ${to}, ${cc}\n\n${body}`
+            });
+            recordAction('Mobile Share');
+        } catch (err) {
+            // User cancelled or share failed, fallback to mailto
+            fallbackMailLink(to, cc, sub, body);
+        }
+    } else {
+        fallbackMailLink(to, cc, sub, body);
+    }
+}
+
+function fallbackMailLink(to, cc, sub, body) {
+    // Standard comma-separated mailto for mobile
+    const mailtoUrl = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+    recordAction('Mobile Click');
+}
+
 function openMail(mode) {
+    if (mode === 'mobile') {
+        handleMobile();
+        return;
+    }
+    
+    // WEB/PC Version (Semicolon and CC parameter for Outlook)
     const to = politicians[polDrop.value][0];
     const cc = politicians[polDrop.value][1];
     const sub = encodeURIComponent(document.getElementById("subject").value);
     const body = encodeURIComponent(document.getElementById("output").value);
     
     if (!sub) return alert("Generate email first!");
-
-    if (mode === 'web') {
-        window.location.href = `mailto:${to}?cc=${cc}&subject=${sub}&body=${body}`;
-        recordAction('Web Click');
-    } else {
-        // MOBILE FIX: Uses comma for multiple recipients and simpler URL
-        window.location.href = `mailto:${to},${cc}?subject=${sub}&body=${body}`;
-        recordAction('Mobile Click');
-    }
+    
+    window.location.href = `mailto:${to}?cc=${cc}&subject=${sub}&body=${body}`;
+    recordAction('Web Click');
 }
 
 function copyAll() {
@@ -201,7 +234,7 @@ function copyAll() {
     if(!s) return alert("Generate email first!");
     navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
     recordAction('Copy All');
-    alert("Copied!");
+    alert("Copied to clipboard!");
 }
 
 let myChart;
@@ -222,7 +255,14 @@ async function updateChart() {
         myChart = new Chart(ctx, {
             type: 'bar',
             data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
-            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    x: { stacked: true }, 
+                    y: { stacked: true, beginAtZero: true } 
+                } 
+            }
         });
     } catch (e) { console.error(e); }
 }
