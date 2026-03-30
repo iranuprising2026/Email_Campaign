@@ -28,7 +28,7 @@
         select, textarea, input, button {
             width: 100%; margin: 8px 0; padding: 12px;
             font-size: 16px; border-radius: 8px; border: 1px solid #ccc;
-            box-sizing: border-box; /* Prevents input overflow */
+            box-sizing: border-box;
         }
         
         .btn-generate {
@@ -38,24 +38,22 @@
 
         .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .flex-row { display: flex; gap: 10px; }
-        .flex-row a { flex: 1; text-decoration: none; }
+        .flex-row button, .flex-row a { flex: 1; }
         
-        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; }
-        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; }
+        .btn-web { background: #2c5282; color: white; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; width: 100%; }
         .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; }
 
         textarea { min-height: 200px; }
         
-        /* CRITICAL FIX FOR THE CHART BLACKOUT */
         .chart-container {
             background: white; padding: 15px; border-radius: 10px;
             margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative; 
-            height: 400px; /* Force a fixed height */
+            height: 400px;
             width: 100%;
         }
         .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
-        .strategy-note { color: #2b6cb0; font-style: italic; margin-bottom: 10px; display: block; }
     </style>
 </head>
 
@@ -66,28 +64,23 @@
     <div class="instruction-container">
         <div class="inst-box">
             <strong>Action Steps:</strong>
-            <span class="strategy-note">Check the chart below! Prioritize politicians with fewer emails.</span>
             <ol style="padding-left: 20px; margin: 8px 0;">
                 <li>Select a politician and version.</li>
                 <li>Click <b>"Generate Email Content"</b>.</li>
-                <li><b>WEB/PC:</b> For Outlook/Desktop.</li>
-                <li><b>MOBILE:</b> For Gmail/Mail Apps.</li>
-                <li><b>Copy:</b> For manual pasting.</li>
+                <li><b>WEB/PC:</b> Use for Outlook Desktop.</li>
+                <li><b>MOBILE:</b> Use for Phone Apps/Sharing.</li>
             </ol>
-            <p class="warning-text">*If fields are empty, use Copy All.</p>
+            <p class="warning-text">*If buttons fail, use Copy All.</p>
         </div>
 
         <div class="inst-box rtl">
             <strong>مراحل اقدام:</strong>
-            <span class="strategy-note">نمودار پایین را چک کنید! به کسانی که ایمیل کمتری دارند پیام دهید.</span>
             <ol style="padding-right: 20px; margin: 8px 0;">
                 <li>سیاستمدار و نسخه را انتخاب کنید.</li>
                 <li>دکمه <b>"Generate Email"</b> را بزنید.</li>
-                <li><b>Web/PC:</b> برای اوت‌لوک و کامپیوتر.</li>
-                <li><b>Mobile:</b> برای اپلیکیشن موبایل.</li>
-                <li><b>Copy:</b> برای کپی و چسباندن دستی.</li>
+                <li><b>Web/PC:</b> برای کامپیوتر.</li>
+                <li><b>Mobile:</b> برای گوشی و اشتراک‌گذاری.</li>
             </ol>
-            <p class="warning-text">*در صورت خالی بودن فیلدها، از دکمه کپی استفاده کنید.</p>
         </div>
     </div>
 
@@ -102,10 +95,10 @@
     <h3>Subject:</h3>
     <input id="subject" readonly>
 
-    <h3>Recipient Emails (To; CC):</h3>
+    <h3>Recipient Emails:</h3>
     <input id="recipient" readonly>
 
-    <h3>Email Body (Dutch + English):</h3>
+    <h3>Email Body:</h3>
     <textarea id="output" readonly></textarea>
 
     <div class="button-group">
@@ -113,9 +106,7 @@
             <a id="lnk_web" href="javascript:void(0)">
                 <button type="button" class="btn-web">1. Open Email (WEB/PC)</button>
             </a>
-            <a id="lnk_mobile" href="javascript:void(0)">
-                <button type="button" class="btn-mobile">2. Open Email (MOBILE)</button>
-            </a>
+            <button type="button" class="btn-mobile" onclick="doMobileShare()">2. Open Email (MOBILE)</button>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
@@ -126,7 +117,6 @@
     </div>
 
 <script>
-// --- CONFIG ---
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
 const { createClient } = supabase;
@@ -167,13 +157,11 @@ const emails = {
 };
 
 
-// --- INIT UI ---
 const polDrop = document.getElementById("politician");
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
 const verDrop = document.getElementById("version");
 Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; verDrop.add(o); });
 
-// --- LOGIC ---
 async function recordAction(type) {
     try {
         await supabaseClient.from('email_stats').insert([{ 
@@ -190,10 +178,11 @@ function generateEmail() {
     const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
     
-    const rawName = document.getElementById("username").value;
+    const rawName = document.getElementById("username").value.trim();
+    // Placeholder Logic
     const userEN = rawName || "An Iranian resident in the Netherlands";
     const userDU = rawName || "Een Iraanse inwoner in Nederland";
-    const city = document.getElementById("city").value || "";
+    const city = document.getElementById("city").value.trim() || "";
 
     const to = politicians[pKey][0];
     const cc = politicians[pKey][1];
@@ -212,17 +201,34 @@ function generateEmail() {
     const eS = encodeURIComponent(sub);
     const eB = encodeURIComponent(body);
 
-    // WEB FIX: Just include both in the To field with %3B (Semicolon)
+    // Desktop/Web Link
     const webLnk = document.getElementById("lnk_web");
     webLnk.href = `mailto:${to}%3B${cc}?subject=${eS}&body=${eB}`;
     webLnk.onclick = () => recordAction('Web Click');
-
-    // MOBILE FIX: Use comma for multiple recipients and put everything in the main TO string.
-    const mobLnk = document.getElementById("lnk_mobile");
-    mobLnk.href = `mailto:${to},${cc}?subject=${eS}&body=${eB}`;
-    mobLnk.onclick = () => recordAction('Mobile Click');
     
-    alert("Email Generated! Choose a button below.");
+    alert("Email Generated!");
+}
+
+function doMobileShare() {
+    const to = politicians[polDrop.value][0];
+    const cc = politicians[polDrop.value][1];
+    const sub = document.getElementById("subject").value;
+    const body = document.getElementById("output").value;
+
+    if (!sub) return alert("Please generate email first!");
+
+    // Check if browser supports Native Sharing (Modern Mobile Fix)
+    if (navigator.share) {
+        navigator.share({
+            title: sub,
+            text: `To: ${to}, ${cc}\n\n${body}`
+        }).then(() => recordAction('Mobile Share'))
+          .catch(console.error);
+    } else {
+        // Fallback for older mobile browsers
+        window.location.href = `mailto:${to},${cc}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+        recordAction('Mobile Click Fallback');
+    }
 }
 
 function copyAll() {
@@ -232,7 +238,7 @@ function copyAll() {
     if(!s) return alert("Generate email first!");
     navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
     recordAction('Copy All');
-    alert("Copied to clipboard!");
+    alert("Copied!");
 }
 
 let myChart;
@@ -257,7 +263,7 @@ async function updateChart() {
             data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
             options: { 
                 responsive: true, 
-                maintainAspectRatio: false, // STOPS THE GROWTH BUG
+                maintainAspectRatio: false,
                 scales: { 
                     x: { stacked: true }, 
                     y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } 
