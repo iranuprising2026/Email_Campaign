@@ -22,8 +22,16 @@
         h2 { text-align: center; color: #1a365d; }
         .instruction-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         .inst-box {
-            flex: 1; min-width: 280px; background: white; padding: 16px;
-            border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 14px;
+            flex: 1; 
+            min-width: 280px; 
+            background: white; 
+            padding: 16px;
+            border-radius: 10px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+            font-size: 14px;
+            /* ADD THESE TWO LINES */
+            color: #1e293b !important; 
+            line-height: 1.5;
         }
         .rtl { direction: rtl; text-align: right; font-family: Tahoma, Arial, sans-serif; }
         select, textarea, input, button {
@@ -39,11 +47,33 @@
         .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; border: none; }
         textarea { min-height: 200px; }
         .chart-container {
-            background: white; padding: 15px; border-radius: 10px;
-            margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            position: relative; height: 400px; width: 100%;
+            background: white !important;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: relative;
+            height: 650px; /* Use 650px for total safety */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #statsChart {
+            width: 100% !important;
+            height: 100% !important;
         }
         #version-tag { font-size: 10px; color: #ccc; text-align: center; margin-top: 20px; }
+        /* This ensures "Subject:", "Recipient:", and "Preview:" are always visible */
+        h3 { 
+            color: #1e293b !important; 
+            margin-bottom: 5px; 
+            margin-top: 15px; 
+        }
+
+        /* This ensures the text inside the input boxes is also dark */
+        input[readonly], textarea[readonly] {
+            color: #334155 !important;
+        }
     </style>
 </head>
 
@@ -51,22 +81,41 @@
 
     <h2>Email Dutch Politicians</h2>
 
-    <div class="instruction-container">
-        <div class="inst-box">
-            <strong>Action Steps:</strong>
-            <ol>
-                <li>Fill name/city (optional).</li>
-                <li>Pick a politician and click <b>Generate</b>.</li>
-                <li>Use <b>Mobile</b> for phones or <b>Web</b> for PC.</li>
-            </ol>
+ <div class="instruction-container">
+        <div class="inst-box" style="border-left: 5px solid #2b6cb0;">
+            <strong style="color: #2b6cb0;">Action Steps:</strong>
+            <p style="margin: 5px 0; font-size: 13px; color: #4a5568;">
+                🚩 You can first check the <b>Live Action Tracker</b> below to choose politicians or email versions with lower numbers.
+            </p>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
+            <strong>Steps:</strong>
+            <div style="margin-top: 5px;">
+                1. Enter your Name/City (optional).<br>
+                2. Select a Politician & Version.<br>
+                3. Click <b>Generate Email Content</b>.<br>
+                4. Click <b>Mobile</b> (phone) or <b>Web</b> (PC).
+            </div>
+            <p style="margin-top: 10px; font-size: 12px; color: #718096; font-style: italic;">
+                * If the app doesn't open, use the <b>Copy</b> button to paste manually.
+            </p>
         </div>
-        <div class="inst-box rtl">
-            <strong>مراحل اقدام:</strong>
-            <ol>
-                <li>نام و شهر را وارد کنید (اختیاری).</li>
-                <li>سیاستمدار را انتخاب و <b>Generate</b> را بزنید.</li>
-                <li>برای گوشی از <b>Mobile</b> و کامپیوتر از <b>Web</b> استفاده کنید.</li>
-            </ol>
+
+        <div class="inst-box rtl" style="border-right: 5px solid #38a169;">
+            <strong style="color: #38a169;">مراحل اقدام:</strong>
+            <p style="margin: 5px 0; font-size: 13px; color: #4a5568;">
+                🚩 ابتدا می‌توانید جدول <b>Live Action Tracker</b> را در پایین صفحه چک کنید تا سیاستمداران یا نسخه‌هایی را انتخاب کنید که عدد کمتری دارند.
+            </p>
+            <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
+            <strong>مراحل:</strong>
+            <div style="margin-top: 5px;">
+                ۱. نام و شهر خود را وارد کنید (اختیاری).<br>
+                ۲. سیاستمدار و نسخه ایمیل را انتخاب کنید.<br>
+                ۳. دکمه <b>Generate Email Content</b> را بزنید.<br>
+                ۴. روی <b>Mobile</b> (گوشی) یا <b>Web</b> (کامپیوتر) کلیک کنید.
+            </div>
+            <p style="margin-top: 10px; font-size: 12px; color: #718096; font-style: italic;">
+                * اگر برنامه ایمیل باز نشد، از دکمه <b>Copy</b> برای چسباندن دستی استفاده کنید.
+            </p>
         </div>
     </div>
 
@@ -94,9 +143,16 @@
     </div>
 
     <div class="chart-container">
-        <h4 style="margin:0; text-align:center;">Live Action Tracker</h4>
-        <canvas id="statsChart"></canvas>
+    <div style="text-align: center; margin-bottom: 15px;">
+        <strong style="color: #1a365d; display: block; font-size: 16px;">
+            Number of Open Email / Copy to Clipboard Clicks
+        </strong>
+        <span style="color: #4a5568; display: block; font-size: 14px; margin-top: 4px;" dir="rtl">
+            تعداد دفعات باز کردن ایمیل یا کپی در کلیپ‌بورد
+        </span>
     </div>
+    <canvas id="statsChart"></canvas>
+</div>
 
     <div id="version-tag">Version: 2026.03.30.10 (Outlook Slashes Fix)</div>
 
@@ -156,24 +212,41 @@ function generateEmail() {
     const pKey = polDrop.value;
     const pName = pKey.split(' (')[0];
     const vKey = verDrop.value;
+
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
-    const userFallback = "Een Iraanse inwoner in Nederland";
-    const finalUser = rawName || userFallback;
+
+    // 1. Define the specific fallbacks for each language
+    const dutchFallback = "Een Iraanse inwoner in Nederland";
+    const englishFallback = "An Iranian resident in the Netherlands";
+
+    // 2. Logic: If name is empty, use language-specific fallbacks. 
+    // If name is NOT empty, use the name for both.
+    const finalUserDutch = rawName || dutchFallback;
+    const finalUserEnglish = rawName || englishFallback;
 
     const to = politicians[pKey][0];
     const cc = politicians[pKey][1];
     const sub = emailSubjects[vKey];
 
-    let body = (emails[vKey] || emails["Version 1"])
-        .replace(/\[NAME\]/g, pName)
-        .replace(/\[USER\]/g, finalUser)
-        .replace(/\[CITY\]/g, cityVal);
+    // 3. We split the template handling to ensure the right name goes to the right section
+    let template = (emails[vKey] || emails["Version 1"]);
+    
+    // Replace the placeholders
+    let body = template.replace(/\[NAME\]/g, pName);
+    
+    // We target the Dutch section (first half) and English section (second half)
+    // Since [USER] appears twice in your templates, we replace them one by one.
+    body = body.replace("[USER]", finalUserDutch); // First occurrence (Dutch)
+    body = body.replace("[USER]", finalUserEnglish); // Second occurrence (English)
+    
+    // Replace city (if empty, it just removes the placeholder)
+    body = body.replace(/\[CITY\]/g, cityVal);
 
     document.getElementById("recipient").value = `${to}; ${cc}`;
     document.getElementById("subject").value = sub;
     document.getElementById("output").value = body;
-    alert("Generated! Click Mobile or Web to send.");
+    alert("Generated! Now click Open Email.");
 }
 
 function triggerMailto(url) {
@@ -227,25 +300,59 @@ async function updateChart() {
     try {
         const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
         if (error) throw error;
+        
         const labels = Object.keys(politicians);
         const versions = Object.keys(emailSubjects);
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
+        
         const datasets = versions.map((v, i) => ({
             label: v,
-            data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
+            data: labels.map(p => data ? data.filter(r => r.politician_name === p && r.version_name === v).length : 0),
             backgroundColor: colors[i]
         }));
+
         const ctx = document.getElementById('statsChart').getContext('2d');
         if (myChart) myChart.destroy();
+        
         myChart = new Chart(ctx, {
             type: 'bar',
-            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
+            data: { 
+                labels: labels.map(l => l.split(' (')[0]), 
+                datasets: datasets 
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                // --- THE FIXES START HERE ---
+                layout: {
+                    padding: {
+                        bottom: 120, // Huge buffer so names never get cut off
+                        top: 20
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { color: '#1e293b' } // Visible on CodePen
+                    }
+                },
                 scales: {
-                    x: { stacked: true },
-                    y: { stacked: true, beginAtZero: true }
+                    x: { 
+                        stacked: true,
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45, // Slants the names
+                            minRotation: 45,
+                            font: { size: 11 },
+                            color: '#1e293b' // Visible on CodePen
+                        }
+                    },
+                    y: { 
+                        stacked: true, 
+                        beginAtZero: true,
+                        ticks: { color: '#1e293b' } 
+                    }
                 }
             }
         });
