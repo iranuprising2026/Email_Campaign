@@ -1,204 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Dutch Politicians</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Dutch Politicians</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; background-color: #f0f4f8; }
-        .box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        select, input, textarea, button { width: 100%; margin: 10px 0; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        
-        .btn-generate { background: #2b6cb0; color: white; font-weight: bold; cursor: pointer; }
-        .btn-web { background: #2c5282; color: white; font-weight: bold; }
-        .btn-mobile { background: #38a169; color: white; font-weight: bold; }
-        .btn-copy { background: #718096; color: white; }
-        
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row a { flex: 1; text-decoration: none; }
-        
-        .chart-container { position: relative; height: 400px; width: 100%; }
-        .rtl { direction: rtl; text-align: right; }
-    </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 16px;
+            background: linear-gradient(to bottom right, #f7fafc, #e6f0ff);
+        }
+        h2 { text-align: center; color: #1a365d; }
+        
+        .instruction-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .inst-box {
+            flex: 1; min-width: 280px; background: white; padding: 16px;
+            border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 14px;
+        }
+        .rtl { direction: rtl; text-align: right; font-family: Tahoma, Arial, sans-serif; }
+
+        select, textarea, input, button {
+            width: 100%; margin: 8px 0; padding: 12px;
+            font-size: 16px; border-radius: 8px; border: 1px solid #cbd5e0;
+        }
+        button {
+            background: linear-gradient(to right, #2b6cb0, #2c5282);
+            color: white; border: none; cursor: pointer; font-weight: bold;
+        }
+        button:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        textarea { min-height: 200px; }
+        
+        .chart-container {
+            background: white; padding: 15px; border-radius: 10px;
+            margin-top: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .warning-text { color: #c53030; font-weight: bold; font-size: 12px; margin-top: 5px; }
+        .strategy-note { color: #2b6cb0; font-style: italic; margin-bottom: 10px; display: block; }
+    </style>
 </head>
+
 <body>
 
-    <div class="box">
-        <h2>Email Dutch Politicians</h2>
-        <div class="flex-row">
-            <div style="font-size: 13px;"><strong>Steps:</strong> Generate > Choose Web or Mobile.</div>
-            <div class="rtl" style="font-size: 13px;"><strong>مراحل:</strong> بزنید Generate > انتخاب دکمه وب یا موبایل.</div>
-        </div>
-    </div>
+    <h2>Email Dutch Politicians</h2>
 
-    <div class="box">
-        <input id="user_name" placeholder="Your Name (Optional)">
-        <input id="user_city" placeholder="Your City (Optional)">
-        <select id="sel_pol"></select>
-        <select id="sel_ver"></select>
-        <button class="btn-generate" onclick="doGenerate()">1. Generate Email Content</button>
-    </div>
+    <div class="instruction-container">
+        <div class="inst-box">
+            <strong>Action Steps:</strong>
+            <span class="strategy-note">Check the chart at the bottom first! Send emails to politicians with fewer counts, or choose email versions (colors) that are used less.</span>
+            <ol style="padding-left: 20px; margin: 8px 0;">
+                <li>Select a politician.</li>
+                <li>Select an email version (1-5).</li>
+                <li>Click "Generate Email".</li>
+                <li>Click "Open in Email App" or "Copy All" to send manually.</li>
+            </ol>
+            <p class="warning-text">*If email fields appear empty or show "///" in your app, please copy the addresses manually from the boxes below.</p>
+        </div>
 
-    <div class="box">
-        <label>Subject:</label>
-        <input id="out_sub" readonly>
-        <label>Recipients:</label>
-        <input id="out_recp" readonly>
-        <label>Body:</label>
-        <textarea id="out_body" style="height: 150px;" readonly></textarea>
+        <div class="inst-box rtl">
+            <strong>مراحل اقدام:</strong>
+            <span class="strategy-note">ابتدا نمودار پایین صفحه را چک کنید! به سیاستمدارانی ایمیل بزنید که تعداد کمتری دریافت کرده‌اند یا نسخه‌هایی (رنگ‌هایی) را انتخاب کنید که کمتر استفاده شده‌اند.</span>
+            <ol style="padding-right: 20px; margin: 8px 0;">
+                <li>یک سیاستمدار را انتخاب کنید.</li>
+                <li>یک نسخه ایمیل انتخاب کنید (نسخه ۱ تا ۵).</li>
+                <li>روی Generate Email کلیک کنید.</li>
+                <li>روی Open in Email App یا Copy All برای ارسال دستی کلیک کنید.</li>
+            </ol>
+            <p class="warning-text">*اگر آدرس‌ها در اپلیکیشن ایمیل شما خالی است یا "///" نشان می‌دهد، لطفاً آدرس‌ها را به صورت دستی از کادرهای زیر کپی کنید.</p>
+        </div>
+    </div>
 
-        <div class="flex-row">
-            <a id="lnk_web" href="javascript:void(0)">
-                <button type="button" class="btn-web">2a. Open Email (WEB/PC)</button>
-            </a>
-            <a id="lnk_mobile" href="javascript:void(0)">
-                <button type="button" class="btn-mobile">2b. Open Email (MOBILE)</button>
-            </a>
-        </div>
-        <button class="btn-copy" onclick="doCopy()">3. Copy All</button>
-    </div>
+    <input id="username" placeholder="Your Name (optional)">
+    <input id="city" placeholder="City (optional)">
 
-    <div class="box">
-        <h4 style="text-align:center;">Action Tracker</h4>
-        <div class="chart-container">
-            <canvas id="myChart"></canvas>
-        </div>
-    </div>
+    <select id="politician"></select>
+    <select id="version"></select>
+
+    <button onclick="generateEmail()">Generate Email</button>
+
+    <h3>Subject:</h3>
+    <input id="subject" readonly>
+
+    <h3>Recipient Emails (To; CC):</h3>
+    <input id="recipient" readonly>
+
+    <h3>Email Body (Dutch + English):</h3>
+    <textarea id="output" readonly></textarea>
+
+    <br>
+    <a id="sendBtn" href="#"><button onclick="recordAction('Open Email App')">Open in Email App</button></a>
+    <button onclick="copyAll()">Copy All</button>
+
+    <div class="chart-container">
+        <h4 style="margin-top:0; text-align:center;">Live Tracker (Grouped by Version)</h4>
+        <canvas id="statsChart"></canvas>
+    </div>
 
 <script>
-// --- CONFIG & DATA ---
-const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
+// --- CONFIG ---
+const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co'; 
 const SUPABASE_KEY = 'sb_publishable_veX7XCXUYYswI-KOVRdK7A_B2rel21w';
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-    "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
-    "Ruben Brekelmans (VVD)": ["info@vvd.nl","r.brekelmans@tweedekamer.nl"],
-    "Jesse Klaver (GL-PvdA)": ["info@groenlinks.nl","j.klaver@tweedekamer.nl"],
-    "Geert Wilders (PVV)": ["pvv.publiek@tweedekamer.nl","g.wilders@tweedekamer.nl"],
-    "Henri Bontenbal (CDA)": ["info@cda.nl","h.bontenbal@tweedekamer.nl"],
-    "Joost Eerdmans (JA21)": ["info@ja21.nl","b.eerdmans@tweedekamer.nl"],
-    "Lidewij de Vos (FVD)": ["info@fvdemocratie.nl","l.dvos@tweedekamer.nl"],
-    "Henk Vermeer (BBB)": ["info@bbb.nl","h.vermeer@tweedekamer.nl"],
-    "Stephan van Baarle (DENK)": ["info@denk.nl","s.vbaarle@tweedekamer.nl"],
-    "Chris Stoffer (SGP)": ["info@sgp.nl","c.stoffer@tweedekamer.nl"],
-    "Esther Ouwehand (PvdD)": ["info@partijvdedieren.nl","esther.ouwehand@tweedekamer.nl"],
-    "Mirjam Bikker (ChristenUnie)": ["info@christenunie.nl","m.bikker@tweedekamer.nl"],
-    "Jimmy Dijk (SP)": ["info@sp.nl","j.dijk@tweedekamer.nl"],
-    "Jan Struijs (50PLUS)": ["info@50pluspartij.nl","j.struijs@tweedekamer.nl"],
-    "Laurens Dassen (Volt)": ["info@voltnederland.org","l.dassen@tweedekamer.nl"]
+    "Jan Paternotte (D66)": ["info@d66.nl","j.paternotte@tweedekamer.nl"],
+    "Ruben Brekelmans (VVD)": ["info@vvd.nl","r.brekelmans@tweedekamer.nl"],
+    "Jesse Klaver (GL-PvdA)": ["info@groenlinks.nl","j.klaver@tweedekamer.nl"],
+    "Geert Wilders (PVV)": ["pvv.publiek@tweedekamer.nl","g.wilders@tweedekamer.nl"],
+    "Henri Bontenbal (CDA)": ["info@cda.nl","h.bontenbal@tweedekamer.nl"],
+    "Joost Eerdmans (JA21)": ["info@ja21.nl","b.eerdmans@tweedekamer.nl"],
+    "Lidewij de Vos (FVD)": ["info@fvdemocratie.nl","l.dvos@tweedekamer.nl"],
+    "Henk Vermeer (BBB)": ["info@bbb.nl","h.vermeer@tweedekamer.nl"],
+    "Stephan van Baarle (DENK)": ["info@denk.nl","s.vbaarle@tweedekamer.nl"],
+    "Chris Stoffer (SGP)": ["info@sgp.nl","c.stoffer@tweedekamer.nl"],
+    "Esther Ouwehand (PvdD)": ["info@partijvdedieren.nl","esther.ouwehand@tweedekamer.nl"],
+    "Mirjam Bikker (ChristenUnie)": ["info@christenunie.nl","m.bikker@tweedekamer.nl"],
+    "Jimmy Dijk (SP)": ["info@sp.nl","j.dijk@tweedekamer.nl"],
+    "Jan Struijs (50PLUS)": ["info@50pluspartij.nl","j.struijs@tweedekamer.nl"],
+    "Laurens Dassen (Volt)": ["info@voltnederland.org","l.dassen@tweedekamer.nl"]
 };
 
-const subjects = {
-    "Version 1": "Request for Action Regarding Iranian Sit-In Protest",
-    "Version 2": "Urgent: Support Iranian Sit-In Protest",
-    "Version 3": "Iranian Protest Outside Ministry – Please Support",
-    "Version 4": "Action Needed: Iranian Sit-In and Embassy Closure",
-    "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
+const emailSubjects = {
+    "Version 1": "Request for Action Regarding Iranian Sit-In Protest",
+    "Version 2": "Urgent: Support Iranian Sit-In Protest",
+    "Version 3": "Iranian Protest Outside Ministry – Please Support",
+    "Version 4": "Action Needed: Iranian Sit-In and Embassy Closure",
+    "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
 };
 
-const emailTexts = {
-    "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
-    "Version 2": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs houdt al meer dan 75 dagen een sit-in voor het Nederlandse ministerie van Buitenlandse Zaken...",
-    "Version 3": "Dutch:\nGeachte [NAME],\n\nAl meer dan 75 dagen voert een groep Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken...",
-    "Version 4": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit bij het ministerie van Buitenlandse Zaken...",
-    "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken..."
+const emails = {
+    "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been on a sit-in for more than 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure of the embassy. We also urge recognition of Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
+    "Version 2": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs houdt al meer dan 75 dagen een sit-in voor het Nederlandse ministerie van Buitenlandse Zaken. Ze eisen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Daarnaast verzoeken wij u ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure. Furthermore, we also urge you to recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
+    "Version 3": "Dutch:\nGeachte [NAME],\n\nAl meer dan 75 dagen voert een groep Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken. Ze eisen dat de ambassade van de Islamitische Republiek wordt gesloten na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en steun te verlenen aan de sluiting van de ambassade. Verder vragen wij tevens om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van de Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nFor over 75 days, a group of Iranians has held a sit-in in front of the Ministry of Foreign Affairs, demanding closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. In addition, we ask you to recognize Crown Prince Reza Pahlavi as a transitional leader; he is supported by the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]",
+    "Version 4": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit bij het ministerie van Buitenlandse Zaken, met de eis dat de ambassade van de Islamitische Republiek wordt gesloten na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt verkeerde informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Daarnaast vragen wij u ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij heeft de steun van de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Furthermore, we also request that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]",
+    "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
 };
 
-// --- INIT UI ---
-const pSel = document.getElementById("sel_pol");
-const vSel = document.getElementById("sel_ver");
-Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; pSel.add(o); });
-Object.keys(subjects).forEach(v => { let o = document.createElement("option"); o.text = v; vSel.add(o); });
+// Populate Dropdowns
+const polDrop = document.getElementById("politician");
+Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
+const verDrop = document.getElementById("version");
+Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; verDrop.add(o); });
 
-let isGenerated = false;
-
-// --- CORE LOGIC ---
-async function logStats(type) {
-    try {
-        await client.from('email_stats').insert([{ 
-            politician_name: pSel.value, 
-            version_name: vSel.value, 
-            action_type: type 
-        }]);
-        drawChart();
-    } catch (e) { console.error(e); }
+// Tracking
+async function recordAction(type) {
+    const p = polDrop.value;
+    const v = verDrop.value;
+    try {
+        await supabaseClient.from('email_stats').insert([{ politician_name: p, version_name: v, action_type: type }]);
+        updateChart();
+    } catch (e) { console.error(e); }
 }
 
-function doGenerate() {
-    const pKey = pSel.value;
-    const vKey = vSel.value;
-    const pName = pKey.split(' (')[0];
-    const user = document.getElementById("user_name").value || "An Iranian Resident";
-    const city = document.getElementById("user_city").value || "";
+function generateEmail() {
+    const pKey = polDrop.value;
+    const polName = pKey.split(' (')[0];
+    const vKey = verDrop.value;
+    const user = document.getElementById("username").value || "An Iranian Resident in the Netherlands";
+    const city = document.getElementById("city").value || "";
 
-    const to = politicians[pKey][0];
-    const cc = politicians[pKey][1];
-    const sub = subjects[vKey];
-    const body = emailTexts[vKey].replace(/\[NAME\]/g, pName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
+    const to = politicians[pKey][0];
+    const cc = politicians[pKey][1];
+    const sub = emailSubjects[vKey];
+    let body = emails[vKey].replace(/\[NAME\]/g, polName).replace(/\[USER\]/g, user).replace(/\[CITY\]/g, city);
 
-    document.getElementById("out_sub").value = sub;
-    document.getElementById("out_recp").value = `${to}; ${cc}`;
-    document.getElementById("out_body").value = body;
+    document.getElementById("recipient").value = `${to}; ${cc}`;
+    document.getElementById("subject").value = sub;
+    document.getElementById("output").value = body;
 
-    const eS = encodeURIComponent(sub);
-    const eB = encodeURIComponent(body);
-
-    // WEB: %3B is the encoded semicolon for Outlook Desktop
-    document.getElementById("lnk_web").href = `mailto:${to}%3B${cc}?cc=${cc}&subject=${eS}&body=${eB}`;
-    document.getElementById("lnk_web").onclick = () => logStats("Web Click");
-
-    // MOBILE: Comma is safer for mobile Gmail/Outlook
-    document.getElementById("lnk_mobile").href = `mailto:${to},${cc}?cc=${cc}&subject=${eS}&body=${eB}`;
-    document.getElementById("lnk_mobile").onclick = () => logStats("Mobile Click");
-    
-    isGenerated = true;
-    alert("Generated! Now click a green or blue button.");
+    // Mobile Fix
+    const mailto = `mailto:${to},${cc}?cc=${cc}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    document.getElementById("sendBtn").href = mailto;
 }
 
-function doCopy() {
-    if (!isGenerated) return alert("Generate first!");
-    const text = `To: ${document.getElementById("out_recp").value}\nSubject: ${document.getElementById("out_sub").value}\n\n${document.getElementById("out_body").value}`;
-    navigator.clipboard.writeText(text);
-    logStats("Copy All");
-    alert("Copied!");
+function copyAll() {
+    const r = document.getElementById("recipient").value;
+    const s = document.getElementById("subject").value;
+    const b = document.getElementById("output").value;
+    if(!s) return alert("Generate email first!");
+    navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
+    recordAction('Copy All');
+    alert("Copied!");
 }
 
-let chartObj;
-async function drawChart() {
-    try {
-        const { data, error } = await client.from('email_stats').select('politician_name, version_name');
-        if (error || !data) return;
-
-        const labels = Object.keys(politicians);
-        const versions = Object.keys(subjects);
-        const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
-
-        const datasets = versions.map((v, i) => ({
-            label: v,
-            data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
-            backgroundColor: colors[i]
-        }));
-
-        const ctx = document.getElementById('myChart').getContext('2d');
-        if (chartObj) chartObj.destroy();
-        chartObj = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } 
-            }
-        });
-    } catch (err) { console.error("Chart failed:", err); }
+let myChart;
+async function updateChart() {
+    try {
+        const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
+        if (error) throw error;
+        const labels = Object.keys(politicians);
+        const versions = Object.keys(emailSubjects);
+        const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
+        const datasets = versions.map((v, i) => ({
+            label: v,
+            data: labels.map(p => data.filter(r => r.politician_name === p && r.version_name === v).length),
+            backgroundColor: colors[i]
+        }));
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
+            options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    } catch (e) { console.error(e); }
 }
 
-window.onload = drawChart;
+window.onload = updateChart;
 </script>
 </body>
 </html>
