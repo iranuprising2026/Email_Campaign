@@ -280,6 +280,10 @@ async function recordAction(type) {
     } catch (e) { console.error(e); }
 }
 
+function triggerMailto(url) {
+    window.location.href = url;
+}
+
 function generateEmail() {
     const topic = document.getElementById("topic").value;
     const vKey = document.getElementById("version").value;
