@@ -54,9 +54,9 @@
             color: #1e293b; 
             margin-top: 15px;
             line-height: 1.6;
-            text-align: left; /* Starts from the left side */
+            text-align: left;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-            white-space: pre-wrap; /* Keeps the line breaks */
+            white-space: pre-wrap;
         }
         .chart-container {
             background: white !important;
@@ -78,7 +78,7 @@
 
     <h2>Email Dutch Politicians</h2>
 
-    <div class="instruction-container">
+  <div class="instruction-container">
         <div class="inst-box" style="border-left: 5px solid #2b6cb0;">
             <strong style="color: #2b6cb0;">Action Steps:</strong>
             <p style="margin: 5px 0; font-size: 13px; color: #4a5568;">
@@ -94,6 +94,9 @@
                 5. Click <b>Mobile</b> or <b>Web</b>.<br>
                 <b style="color: #c53030;">⚠️ Mobile: Use Gmail (Outlook Mobile has bugs).</b>
             </div>
+            <p style="margin-top: 10px; font-size: 13px; color: #2d3748; font-style: italic;">
+                ℹ️ You can see the <b>English translation</b> of the Dutch email in the preview box below.
+            </p>
         </div>
 
         <div class="inst-box rtl" style="border-right: 5px solid #38a169;">
@@ -111,6 +114,9 @@
                 ۵. روی <b>Mobile</b> یا <b>Web</b> کلیک کنید.<br>
                 <b style="color: #c53030;">⚠️ در موبایل حتما از برنامه Gmail استفاده کنید.</b>
             </div>
+            <p style="margin-top: 10px; font-size: 13px; color: #2d3748; font-style: italic;">
+                ℹ️ شما می‌توانید <b>ترجمه انگلیسی</b> متن ایمیل هلندی را در پایین همان بخش مشاهده کنید.
+            </p>
         </div>
     </div>
 
@@ -282,15 +288,12 @@ function generateEmail() {
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
 
-    // Fix for Anonymous users in both languages
     const finalUserDutch = rawName || "Een Iraanse inwoner in Nederland";
     const finalUserEnglish = rawName || "An Iranian resident in the Netherlands";
 
-    // Build Dutch Body
     let body = campaignData[topic].bodies[vKey];
     body = body.replace(/\[NAME\]/g, pName).replace(/\[USER\]/g, finalUserDutch).replace(/\[CITY\]/g, cityVal);
 
-    // Build English Translation Body
     let trans = campaignData[topic].translations[vKey];
     trans = trans.replace(/\[NAME\]/g, pName).replace(/\[USER\]/g, finalUserEnglish).replace(/\[CITY\]/g, cityVal);
 
@@ -298,7 +301,6 @@ function generateEmail() {
     document.getElementById("subject").value = campaignData[topic].subjects[vKey];
     document.getElementById("output").value = body;
     
-    // UI Update for Translation Box
     document.getElementById("translation-area").style.display = "block";
     document.getElementById("trans-subject").innerText = campaignData[topic].subjectsTrans[vKey];
     document.getElementById("translation-text").innerText = trans;
@@ -308,14 +310,19 @@ function generateEmail() {
 
 function openMail(mode) {
     const sub = document.getElementById("subject").value;
-    if (!sub) return alert("Generate content first!");
+    if (!sub) return alert("Please generate content first!");
+    
     const pKey = polDrop.value;
     const allEmails = politicians[pKey];
+    
+    // REVERTED TO ORIGINAL LOGIC: First email in 'To', rest in 'CC'
     const to = allEmails[0];
     const separator = (mode === 'mobile') ? "," : ";";
     const cc = allEmails.slice(1).join(separator);
+    
     const body = document.getElementById("output").value;
     const mailtoUrl = `mailto:${encodeURIComponent(to)}?cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    
     window.location.href = mailtoUrl;
     recordAction(mode === 'mobile' ? 'Mobile Click' : 'Web Click');
 }
