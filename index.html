@@ -315,13 +315,20 @@ function openMail(mode) {
     const pKey = polDrop.value;
     const allEmails = politicians[pKey];
     
-    // REVERTED TO ORIGINAL LOGIC: First email in 'To', rest in 'CC'
+    // 1. Identify the primary recipient
     const to = allEmails[0];
-    const separator = (mode === 'mobile') ? "," : ";";
-    const cc = allEmails.slice(1).join(separator);
     
+    // 2. Determine separator based on mode or device (Original Logic)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const separator = (mode === 'mobile' || isMobile) ? "," : ";";
+    
+    // 3. Join the rest for CC
+    const cc = allEmails.slice(1).join(separator);
     const body = document.getElementById("output").value;
-    const mailtoUrl = `mailto:${encodeURIComponent(to)}?cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+
+    // 4. Construct the URL using the ORIGINAL "Double-To" logic:
+    // mailto:email?to=email&cc=...
+    const mailtoUrl = `mailto:${encodeURIComponent(to)}?to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
     
     window.location.href = mailtoUrl;
     recordAction(mode === 'mobile' ? 'Mobile Click' : 'Web Click');
