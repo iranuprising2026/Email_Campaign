@@ -45,6 +45,19 @@
         .btn-mobile { background: #38a169; color: white; font-weight: bold; cursor: pointer; border: none; height: 50px; }
         .btn-copy { background: #718096; color: white; font-weight: bold; cursor: pointer; border: none; }
         textarea { min-height: 200px; }
+        .translation-box { 
+            background: #ffffff; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border: 2px solid #cbd5e1; 
+            font-size: 16px; 
+            color: #1e293b; 
+            margin-top: 15px;
+            line-height: 1.6;
+            text-align: left; /* Starts from the left side */
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            white-space: pre-wrap; /* Keeps the line breaks */
+        }
         .chart-container {
             background: white !important;
             padding: 20px;
@@ -52,26 +65,12 @@
             margin-top: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
-            height: 650px; 
+            height: 600px; 
             width: 100%;
-            box-sizing: border-box;
         }
-
-        #statsChart {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        #version-tag { font-size: 10px; color: #ccc; text-align: center; margin-top: 20px; }
-        h3, .label-bold { 
-            color: #1e293b !important; 
-            margin-bottom: 5px; 
-            margin-top: 15px; 
-            display: block;
-            font-weight: bold;
-        }
-        input[readonly], textarea[readonly] {
-            color: #334155 !important;
-        }
+        #statsChart { width: 100% !important; height: 100% !important; }
+        .label-bold { color: #1e293b !important; font-weight: bold; margin-top: 15px; display: block; }
+        #topic { border: 2px solid #2b6cb0; background-color: #f0f7ff; font-weight: bold; }
     </style>
 </head>
 
@@ -88,10 +87,11 @@
             <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
             <strong>Steps:</strong>
             <div style="margin-top: 5px;">
-                1. Enter Name/City.<br>
-                2. Select Politician & Email Version.<br>
-                3. Click <b>Generate Content</b>.<br>
-                4. Click <b>Mobile</b> or <b>Web</b>.<br>
+                1. <b>Choose Campaign Topic</b> (Sit-in or Executions).<br>
+                2. Enter Name/City.<br>
+                3. Select Politician & Email Version.<br>
+                4. Click <b>Generate Content</b>.<br>
+                5. Click <b>Mobile</b> or <b>Web</b>.<br>
                 <b style="color: #c53030;">⚠️ Mobile: Use Gmail (Outlook Mobile has bugs).</b>
             </div>
         </div>
@@ -104,54 +104,64 @@
             <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 10px 0;">
             <strong>مراحل:</strong>
             <div style="margin-top: 5px;">
-                ۱. نام و شهر خود را وارد کنید.<br>
-                ۲. سیاستمدار و نسخه را انتخاب کنید.<br>
-                ۳. دکمه <b>Generate Content</b> را بزنید.<br>
-                ۴. روی <b>Mobile</b> یا <b>Web</b> کلیک کنید.<br>
-                <b style="color: #c53030;">⚠️ در موبایل حتما از برنامه Gmail استفاده کنید (Outlook باگ دارد).</b>
+                ۱. <b>موضوع کمپین را انتخاب کنید</b> (تحصن یا اعدام).<br>
+                ۲. نام و شهر خود را وارد کنید.<br>
+                ۳. سیاستمدار و نسخه را انتخاب کنید.<br>
+                ۴. دکمه <b>Generate Content</b> را بزنید.<br>
+                ۵. روی <b>Mobile</b> یا <b>Web</b> کلیک کنید.<br>
+                <b style="color: #c53030;">⚠️ در موبایل حتما از برنامه Gmail استفاده کنید.</b>
             </div>
         </div>
     </div>
 
+    <span class="label-bold">1. Choose Campaign Topic (موضوع کمپین):</span>
+    <select id="topic" onchange="updateUiForTopic()">
+        <option value="sitin">Support Iranian Sit-In Protest (تحصن)</option>
+        <option value="executions">Stop Daily Executions (توقف اعدام‌ها)</option>
+    </select>
+
+    <span class="label-bold">2. Enter Your Details (مشخصات شما):</span>
     <input id="username" placeholder="Your Name (optional)">
     <input id="city" placeholder="City (optional)">
 
-    <span class="label-bold">Choose the politician (Party)</span>
+    <span class="label-bold">3. Choose the Politician (Party):</span>
     <select id="politician"></select>
     
-    <span class="label-bold">Choose an email version 1 to 5 (to prevent spam):</span>
+    <span class="label-bold">4. Choose an Email Version (1 to 5):</span>
     <select id="version"></select>
 
     <button class="btn-generate" onclick="generateEmail()">Generate Email Content</button>
 
-    <h3>Subject:</h3>
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #cbd5e1;">
+
+    <span class="label-bold">Subject (Onderwerp):</span>
     <input id="subject" readonly>
-    <h3>Recipient:</h3>
+    <span class="label-bold">Recipient (Ontvanger):</span>
     <input id="recipient" readonly>
-    <h3>Preview:</h3>
+    <span class="label-bold">Preview (Dutch Content to be Sent):</span>
     <textarea id="output" readonly></textarea>
+
+    <div id="translation-area" class="translation-box" style="display:none;">
+        <strong style="color: #2b6cb0; display: block; margin-bottom: 5px;">Subject Translation:</strong>
+        <div id="trans-subject" style="margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px;"></div>
+        <strong style="color: #2b6cb0; display: block; margin-bottom: 5px;">Body Translation (English):</strong>
+        <div id="translation-text"></div>
+    </div>
 
     <div class="button-group">
         <div class="flex-row">
-            <button onclick="openMail('web')" class="btn-web">1. Open Email (OUTLOOK/PC)</button>
-            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (GMAIL/MOBILE)</button>
+            <button onclick="openMail('web')" class="btn-web">1. Open Email (PC/Outlook)</button>
+            <button onclick="openMail('mobile')" class="btn-mobile">2. Open Email (Mobile/Gmail)</button>
         </div>
         <button class="btn-copy" onclick="copyAll()">3. Copy All to Clipboard</button>
     </div>
 
     <div class="chart-container">
-        <div style="text-align: center; margin-bottom: 15px;">
-            <strong style="color: #1a365d; display: block; font-size: 16px;">
-                Number of Open Email / Copy to Clipboard Clicks
-            </strong>
-            <span style="color: #4a5568; display: block; font-size: 14px; margin-top: 4px;" dir="rtl">
-                تعداد دفعات باز کردن ایمیل یا کپی در کلیپ‌بورد
-            </span>
+        <div style="text-align: center; margin-bottom: 10px;">
+            <strong id="chartTitle" style="color: #1a365d; font-size: 18px;">Live Action Tracker</strong>
         </div>
         <canvas id="statsChart"></canvas>
     </div>
-
-    <div id="version-tag">Version: 2026.03.30.13 (Label Update)</div>
 
 <script>
 const SUPABASE_URL = 'https://tizmgyhtydyudjozgbgq.supabase.co';
@@ -160,220 +170,188 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const politicians = {
-    "Caspar Veldkamp (NSC)": [
-        "c.veldkamp@tweedekamer.nl",
-        "p.omtzigt@tweedekamer.nl",
-        "n.vandenhil@tweedekamer.nl",
-        "info@partijnieuwsociaalcontract.nl"
-    ],
-    "Ruben Brekelmans (VVD)": [
-        "r.brekelmans@tweedekamer.nl",
-        "d.yesilgoz@tweedekamer.nl",
-        "s.erkens@tweedekamer.nl",
-        "info@vvd.nl"
-    ],
-    "Jan Paternotte (D66)": [
-        "j.paternotte@tweedekamer.nl",
-        "s.sjoerdsma@tweedekamer.nl",
-        "h.hammelburg@tweedekamer.nl",
-        "info@d66.nl"
-    ],
-    "Jesse Klaver (GL-PvdA)": [
-        "j.klaver@tweedekamer.nl",
-        "k.piri@tweedekamer.nl",
-        "s.maatoug@tweedekamer.nl",
-        "info@groenlinks.nl"
-    ],
-    "Geert Wilders (PVV)": [
-        "g.wilders@tweedekamer.nl",
-        "m.markuszower@tweedekamer.nl",
-        "r.deroon@tweedekamer.nl",
-        "pvv.publiek@tweedekamer.nl"
-    ],
-    "Laurens Dassen (Volt)": [
-        "l.dassen@tweedekamer.nl",
-        "n.koekkoek@tweedekamer.nl",
-        "s.bamenga@tweedekamer.nl",
-        "info@voltnederland.org"
-    ],
-    "Henri Bontenbal (CDA)": [
-        "h.bontenbal@tweedekamer.nl",
-        "d.boswijk@tweedekamer.nl",
-        "p.heerma@tweedekamer.nl",
-        "info@cda.nl"
-    ],
-    "Chris Stoffer (SGP)": [
-        "c.stoffer@tweedekamer.nl",
-        "r.bisschop@tweedekamer.nl",
-        "k.vandermolen@tweedekamer.nl",
-        "info@sgp.nl"
-    ],
-    "Mirjam Bikker (ChristenUnie)": [
-        "m.bikker@tweedekamer.nl",
-        "d.ceder@tweedekamer.nl",
-        "e.vandergraaf@tweedekamer.nl",
-        "info@christenunie.nl"
-    ],
-    "Esther Ouwehand (PvdD)": [
-        "esther.ouwehand@tweedekamer.nl",
-        "c.teunissen@tweedekamer.nl",
-        "f.wassenberg@tweedekamer.nl",
-        "info@partijvdedieren.nl"
-    ],
-    "Joost Eerdmans (JA21)": [
-        "b.eerdmans@tweedekamer.nl",
-        "s.pouw-verweij@tweedekamer.nl",
-        "j.eppink@tweedekamer.nl",
-        "info@ja21.nl"
-    ],
-    "Jimmy Dijk (SP)": [
-        "j.dijk@tweedekamer.nl",
-        "j.jaspervandijk@tweedekamer.nl",
-        "s.beckerman@tweedekamer.nl",
-        "info@sp.nl"
-    ],
-    "Lidewij de Vos (FVD)": [
-        "l.dvos@tweedekamer.nl",
-        "t.baudet@tweedekamer.nl",
-        "p.vanmeijeren@tweedekamer.nl",
-        "partij@fvd.nl"
-    ]
+    "Caspar Veldkamp (NSC)": ["c.veldkamp@tweedekamer.nl", "p.omtzigt@tweedekamer.nl", "n.vandenhil@tweedekamer.nl", "info@partijnieuwsociaalcontract.nl"],
+    "Ruben Brekelmans (VVD)": ["r.brekelmans@tweedekamer.nl", "d.yesilgoz@tweedekamer.nl", "s.erkens@tweedekamer.nl", "info@vvd.nl"],
+    "Jan Paternotte (D66)": ["j.paternotte@tweedekamer.nl", "s.sjoerdsma@tweedekamer.nl", "h.hammelburg@tweedekamer.nl", "info@d66.nl"],
+    "Jesse Klaver (GL-PvdA)": ["j.klaver@tweedekamer.nl", "k.piri@tweedekamer.nl", "s.maatoug@tweedekamer.nl", "info@groenlinks.nl"],
+    "Geert Wilders (PVV)": ["g.wilders@tweedekamer.nl", "m.markuszower@tweedekamer.nl", "r.deroon@tweedekamer.nl", "pvv.publiek@tweedekamer.nl"],
+    "Laurens Dassen (Volt)": ["l.dassen@tweedekamer.nl", "n.koekkoek@tweedekamer.nl", "s.bamenga@tweedekamer.nl", "info@voltnederland.org"],
+    "Henri Bontenbal (CDA)": ["h.bontenbal@tweedekamer.nl", "d.boswijk@tweedekamer.nl", "p.heerma@tweedekamer.nl", "info@cda.nl"],
+    "Chris Stoffer (SGP)": ["c.stoffer@tweedekamer.nl", "r.bisschop@tweedekamer.nl", "k.vandermolen@tweedekamer.nl", "info@sgp.nl"],
+    "Mirjam Bikker (ChristenUnie)": ["m.bikker@tweedekamer.nl", "d.ceder@tweedekamer.nl", "e.vandergraaf@tweedekamer.nl", "info@christenunie.nl"],
+    "Esther Ouwehand (PvdD)": ["esther.ouwehand@tweedekamer.nl", "c.teunissen@tweedekamer.nl", "f.wassenberg@tweedekamer.nl", "info@partijvdedieren.nl"],
+    "Joost Eerdmans (JA21)": ["b.eerdmans@tweedekamer.nl", "s.pouw-verweij@tweedekamer.nl", "j.eppink@tweedekamer.nl", "info@ja21.nl"],
+    "Jimmy Dijk (SP)": ["j.dijk@tweedekamer.nl", "j.jaspervandijk@tweedekamer.nl", "s.beckerman@tweedekamer.nl", "info@sp.nl"],
+    "Lidewij de Vos (FVD)": ["l.dvos@tweedekamer.nl", "t.baudet@tweedekamer.nl", "p.vanmeijeren@tweedekamer.nl", "partij@fvd.nl"]
 };
 
-const emailSubjects = {
-    "Version 1": "Request for Action Regarding Iranian Sit-In Protest",
-    "Version 2": "Urgent: Support Iranian Sit-In Protest",
-    "Version 3": "Iranian Sit-in Outside Ministry – Please Support",
-    "Version 4": "Action Needed: Iranian Sit-In and Embassy Closure",
-    "Version 5": "Appeal: Support Iranian Sit-In and Transitional Leadership"
-};
-
-const emails = {
-    "Version 1": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been on a sit-in for more than 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure of the embassy. We also urge recognition of Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
-    "Version 2": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs houdt al meer dan 75 dagen een sit-in voor het Nederlandse ministerie van Buitenlandse Zaken. Ze eisen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime en islamistische bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten buiten het ministerie te ontmoeten en de sluiting van de ambassade te steunen. Daarnaast verzoeken wij u ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs, zoals blijkt uit miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime and Islamist rallies involving non-Iranian nationals, spreading misleading information.\n\nWe request that you meet the protesters outside the ministry and support the closure. Furthermore, we also urge you to recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by nationwide million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 in Munich, Toronto, Los Angeles, and other cities.\n\nKind regards,\n[USER]\n[CITY]",
-    "Version 3": "Dutch:\nGeachte [NAME],\n\nAl meer dan 75 dagen voert een groep Iraniërs een sit-in uit voor het ministerie van Buitenlandse Zaken. Ze eisen dat de ambassade van de Islamitische Republiek wordt gesloten na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en steun te verlenen aan de sluiting van de ambassade. Verder vragen wij tevens om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van de Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nFor over 75 days, a group of Iranians has held a sit-in in front of the Ministry of Foreign Affairs, demanding closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. In addition, we ask you to recognize Crown Prince Reza Pahlavi as a transitional leader; he is supported by the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]",
-    "Version 4": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit bij het ministerie van Buitenlandse Zaken, met de eis dat de ambassade van de Islamitische Republiek wordt gesloten na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt verkeerde informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Daarnaast vragen wij u ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij heeft de steun van de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Furthermore, we also request that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]",
-    "Version 5": "Dutch:\nGeachte [NAME],\n\nEen groep Iraniërs voert al 75+ dagen een sit-in uit bij het ministerie van Buitenlandse Zaken. Ze vragen de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert bijeenkomsten met niet-Iraanse deelnemers en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Wij verzoeken u daarnaast ook om kroonprins Reza Pahlavi te erkennen als overgangsleider; hij wordt gesteund door de meerderheid van Iraniërs, zoals blijkt uit de miljoenenprotesten van 6–10 januari 2026 in Iran en 14 februari 2026 buiten Iran in München, Toronto, Los Angeles en andere steden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]\n\nEnglish:\nDear [NAME],\n\nA group of Iranians has been holding a sit-in for over 75 days at the Ministry of Foreign Affairs, requesting the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes gatherings with non-Iranian nationals and spreads misleading information.\n\nWe request that you meet the protesters and support the closure. Additionally, we ask that you recognize Crown Prince Reza Pahlavi as a transitional leader; he has the support of the majority of Iranians, as witnessed by million-scale protests Jan 6–10, 2026 in Iran and Feb 14, 2026 outside Iran in Munich, Toronto, Los Angeles and other cities.\n\nKind regards,\n[USER]\n[CITY]"
+const campaignData = {
+    sitin: {
+        subjects: {
+            "Version 1": "Verzoek om actie betreffende de Iraanse sit-in protesten",
+            "Version 2": "Urgent: Steun de Iraanse sit-in voor het ministerie",
+            "Version 3": "Iraanse sit-in buitenlandse zaken – Uw steun is nodig",
+            "Version 4": "Actie vereist: Iraanse sit-in en sluiting ambassade",
+            "Version 5": "Oproep: Steun Iraanse sit-in en transitieleiderschap"
+        },
+        subjectsTrans: {
+            "Version 1": "Request for action regarding the Iranian sit-in protests",
+            "Version 2": "Urgent: Support the Iranian sit-in in front of the ministry",
+            "Version 3": "Iranian sit-in Foreign Affairs – Your support is needed",
+            "Version 4": "Action required: Iranian sit-in and embassy closure",
+            "Version 5": "Appeal: Support Iranian sit-in and transitional leadership"
+        },
+        bodies: {
+            "Version 1": "Geachte [NAME],\n\nEen groep Iraniërs voert al meer dan 75 dagen een sit-in uit voor het Nederlandse ministerie van Buitenlandse Zaken, met de eis de sluiting van de ambassade van de Islamitische Republiek na het bloedbad van januari 2026. De ambassade organiseert pro-regime bijeenkomsten en verspreidt valse informatie.\n\nWij verzoeken u de demonstranten te ontmoeten en de sluiting van de ambassade te steunen. Erken tevens kroonprins Reza Pahlavi als overgangsleider; hij geniet de steun van de meerderheid van de Iraniërs.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 2": "Geachte [NAME],\n\nAl meer dan 75 dagen houden Iraniërs een sit-in voor het ministerie van Buitenlandse Zaken. Ze eisen de sluiting van de ambassade van de Islamitische Republiek na de gebeurtenissen van januari 2026. Wij verzoeken u de demonstranten te bezoeken en kroonprins Reza Pahlavi te erkennen als de legitieme overgangsleider van het Iraanse volk.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 3": "Geachte [NAME],\n\nIk schrijf u om aandacht te vragen voor de aanhoudende sit-in van de Iraanse gemeenschap bij het ministerie van Buitenlandse Zaken. Wij eisen de sluiting van de ambassade en de erkenning van kroonprins Reza Pahlavi als overgangsfiguur voor een democratisch Iran. Uw steun is hierbij cruciaal.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 4": "Geachte [NAME],\n\nNa het bloedbad van januari 2026 is de aanwezigheid van de Islamitische Republiek in Nederland onacceptabel. Demonstranten voeren al 75 dagen actie voor het ministerie. Wij roepen u op om de sluiting van de ambassade te steunen en kroonprins Reza Pahlavi te erkennen als leider in de overgang naar democratie.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 5": "Geachte [NAME],\n\nNamens de Iraanse demonstranten die al maanden voor het ministerie van Buitenlandse Zaken staan, vragen wij om een krachtig signaal. Sluit de ambassade van de Islamitische Republiek en erken de rol van kroonprins Reza Pahlavi als vertegenwoordiger van de Iraanse aspiraties voor vrijheid.\n\nMet vriendelijke groet,\n[USER]\n[CITY]"
+        },
+        translations: {
+            "Version 1": "Dear [NAME],\n\nA group of Iranians has been on a sit-in for more than 75 days in front of the Dutch Ministry of Foreign Affairs, demanding the closure of the Islamic Republic embassy after the January 2026 massacre. The embassy organizes pro-regime rallies and spreads false information.\n\nWe request that you meet the protesters and support the closure of the embassy. Also, recognize Crown Prince Reza Pahlavi as a transitional leader; he enjoys the support of the majority of Iranians.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 2": "Dear [NAME],\n\nFor over 75 days, Iranians have held a sit-in at the Ministry of Foreign Affairs. They demand the closure of the Islamic Republic embassy following the events of January 2026. We request you visit the protesters and recognize Crown Prince Reza Pahlavi as the legitimate transitional leader of the Iranian people.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 3": "Dear [NAME],\n\nI am writing to draw attention to the ongoing sit-in of the Iranian community at the Ministry of Foreign Affairs. We demand the closure of the embassy and the recognition of Crown Prince Reza Pahlavi as a transitional figure for a democratic Iran. Your support is crucial.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 4": "Dear [NAME],\n\nAfter the January 2026 massacre, the presence of the Islamic Republic in the Netherlands is unacceptable. Protesters have been active at the Ministry for 75 days. We call on you to support the closure of the embassy and recognize Crown Prince Reza Pahlavi as a leader in the transition to democracy.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 5": "Dear [NAME],\n\nOn behalf of the Iranian protesters who have been standing outside the Ministry of Foreign Affairs for months, we ask for a strong signal. Close the embassy of the Islamic Republic and recognize the role of Crown Prince Reza Pahlavi as a representative of Iranian aspirations for freedom.\n\nKind regards,\n[USER]\n[CITY]"
+        }
+    },
+    executions: {
+        subjects: {
+            "Version 1": "URGENT: Ultimatum vereist om staatsslachting in Iran te stoppen",
+            "Version 2": "Stop de executies in Iran: Sluit de ambassade en bevries IRGC-tegoeden",
+            "Version 3": "Actie vereist: Beëindig de psychologische oorlog en executies in Iran",
+            "Version 4": "Ultimatum voor de Islamitische Republiek: Stop de moorden of vertrek",
+            "Version 5": "Crisis: Eis voor onmiddellijke sluiting van de Iraanse ambassade"
+        },
+        subjectsTrans: {
+            "Version 1": "URGENT: Ultimatum required to stop the state-led slaughter in Iran",
+            "Version 2": "Stop the executions in Iran: Close the embassy and freeze IRGC assets",
+            "Version 3": "Action required: End the psychological war and executions in Iran",
+            "Version 4": "Ultimatum for the Islamic Republic: Stop the killings or face departure",
+            "Version 5": "Crisis: Demand for immediate closure of the Iranian embassy"
+        },
+        bodies: {
+            "Version 1": "Geachte [NAME],\n\nDe Islamitische Republiek voert momenteel een psychologische oorlog tegen Iraanse burgers, zowel binnen als buiten Iran. Terwijl het land al 40 dagen volledig is afgesloten van het internet, worden duizenden gevangen genomen demonstranten geëxecuteerd. Dit volgt op het bloedbad van januari, waarbij tienduizenden werden vermoord na de oproep van kroonprins Reza Pahlavi tot landelijke protesten.\n\nVrijblijvende diplomatie werkt niet. Wij eisen dat u de overheid dwingt tot een direct ultimatum: als de executies van demonstranten niet onmiddellijk stoppen, moet Nederland de ambassade van de Islamitische Republiek sluiten, hun diplomaten uitzetten en alle tegoeden van de IRGC onmiddellijk bevriezen.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 2": "Geachte [NAME],\n\nMet de internetblokkade die nu al 40 dagen duurt, probeert de Islamitische Republiek haar misdaden tegen de menselijkheid te verbergen. Dagelijks worden jonge demonstranten geëxecuteerd als onderdeel van een schrikbewind. Deze terreur volgde op de massale protesten in januari waartoe kroonprins Reza Pahlavi opriep tot landelijke protesten, waarbij tienduizenden het leven lieten.\n\nWij accepteren geen woorden meer. Geef het regime een ultimatum: stop de executies nú, of Nederland sluit de ambassade, zet alle diplomaten uit en bevriest direct alle IRGC-tegoeden.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 3": "Geachte [NAME],\n\nDe huidige executiegolf in Iran is een brute aanval op de menselijke waardigheid. Terwijl Iraniërs al 40 dagen geen internettoegang hebben, voert het regime een psychologische oorlog door dagelijks demonstranten te vermoorden. Dit is de voortzetting van het bloedbad van januari, dat begon nadat kroonprins Reza Pahlavi opriep tot landelijke protesten.\n\nNederland moet een grens trekken. Wij eisen een ultimatum: bij de volgende executie van een demonstrant moet de ambassade van de Islamitische Republiek direct worden gesloten en de diplomaten worden uitgezet. Bevries daarnaast onmiddellijk alle bezittingen van de IRGC.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 4": "Geachte [NAME],\n\nHet Iraanse regime gebruikt executies als een wapen om de bevolking, die al 40 dagen in een internet-blackout leeft, te onderdrukken. Sinds de protesten in januari na de oproep van kroonprins Reza Pahlavi tot landelijke protesten, zijn tienduizenden mensen afgeslacht. Nu worden dagelijks gevangenen vermoord.\n\nStel een keihard ultimatum: de executies moeten stoppen, anders volgt onmiddellijke sluiting van de ambassade en het bevriezen van alle IRGC-assets.\n\nMet vriendelijke groet,\n[USER]\n[CITY]",
+            "Version 5": "Geachte [NAME],\n\nTerwijl de wereld toekijkt, vermoordt de Islamitische Republiek dagelijks demonstranten om de macht te behouden. Na het bloedbad van januari, volgend op de protesten waartoe kroonprins Reza Pahlavi opriep tot landelijke protesten, voert het regime nu een oorlog achter een 40-daagse internetblokkade.\n\nWij vragen u om een ultimatum. Als de executies aanhouden, moet Nederland de ambassade sluiten en de IRGC financieel lamleggen door al hun tegoeden te bevriezen.\n\nMet vriendelijke groet,\n[USER]\n[CITY]"
+        },
+        translations: {
+            "Version 1": "Dear [NAME],\n\nThe Islamic Republic is currently waging a psychological war against Iranian citizens, both inside and outside Iran. While the country has been completely cut off from the internet for 40 days, thousands of detained protesters are being executed. This follows the January massacre, where tens of thousands were murdered following the call from Crown Prince Reza Pahlavi to nationwide protests.\n\nVague diplomacy is failing. We urge you to demand a direct ultimatum from the government: if the executions of protesters do not stop immediately, the Netherlands must close the Islamic Republic embassy, expel their diplomats, and freeze all IRGC assets.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 2": "Dear [NAME],\n\nWith the internet blackout now lasting 40 days, the Islamic Republic is attempting to hide its crimes against humanity. Every day, young protesters are executed as part of a campaign of terror. This followed the massive protests in January called for by Crown Prince Reza Pahlavi to nationwide protests, where tens of thousands lost their lives.\n\nWe no longer accept words. Give the regime an ultimatum: stop the executions now, or the Netherlands will close the embassy, expel all diplomats, and immediately freeze all IRGC assets.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 3": "Dear [NAME],\n\nThe current wave of executions in Iran is a brutal assault on human dignity. While Iranians have been without internet for 40 days, the regime is waging psychological warfare by killing protesters daily. This is a continuation of the January massacre, which began after Crown Prince Reza Pahlavi called for nationwide protests.\n\nThe Netherlands must draw a line. We demand an ultimatum: upon the next execution of a protester, the Islamic Republic embassy must be closed immediately and diplomats expelled. Furthermore, freeze all IRGC assets without delay.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 4": "Dear [NAME],\n\nThe Iranian regime uses executions as a weapon to suppress the population, which has been living in an internet blackout for 40 days. Since the January protests following the call by Crown Prince Reza Pahlavi to nationwide protests, tens of thousands have been slaughtered. Now, prisoners are murdered daily.\n\nSet a harsh ultimatum: the executions must stop, or immediate closure of the embassy and freezing of all IRGC assets will follow.\n\nKind regards,\n[USER]\n[CITY]",
+            "Version 5": "Dear [NAME],\n\nWhile the world watches, the Islamic Republic murders protesters daily in a desperate attempt to cling to power. Following the January massacre, following the protests called for by Crown Prince Reza Pahlavi to nationwide protests, the regime is now waging warfare behind a 40-day internet blockade.\n\nWe ask you to demand an ultimatum. If executions continue, the Netherlands must close the embassy and financially paralyze the IRGC by freezing all their assets.\n\nKind regards,\n[USER]\n[CITY]"
+        }
+    }
 };
 
 const polDrop = document.getElementById("politician");
 Object.keys(politicians).forEach(p => { let o = document.createElement("option"); o.text = p; polDrop.add(o); });
-const verDrop = document.getElementById("version");
-Object.keys(emailSubjects).forEach(v => { let o = document.createElement("option"); o.text = v; verDrop.add(o); });
+
+function updateUiForTopic() {
+    const topic = document.getElementById("topic").value;
+    const verDrop = document.getElementById("version");
+    verDrop.innerHTML = "";
+    Object.keys(campaignData[topic].subjects).forEach(v => {
+        let o = document.createElement("option"); o.text = v; verDrop.add(o);
+    });
+    updateChart();
+}
 
 async function recordAction(type) {
+    const topic = document.getElementById("topic").value;
     try {
-        await supabaseClient.from('email_stats').insert([{ politician_name: polDrop.value, version_name: verDrop.value, action_type: type }]);
+        await supabaseClient.from('email_stats').insert([{ 
+            politician_name: polDrop.value, 
+            version_name: document.getElementById("version").value, 
+            action_type: type,
+            topic: topic 
+        }]);
         updateChart();
     } catch (e) { console.error(e); }
 }
 
 function generateEmail() {
+    const topic = document.getElementById("topic").value;
+    const vKey = document.getElementById("version").value;
     const pKey = polDrop.value;
-    const vKey = verDrop.value;
     const pName = pKey.split(' (')[0];
     const rawName = document.getElementById("username").value.trim();
     const cityVal = document.getElementById("city").value.trim();
 
-    const dutchFallback = "Een Iraanse inwoner in Nederland";
-    const englishFallback = "An Iranian resident in the Netherlands";
-    const finalUserDutch = rawName || dutchFallback;
-    const finalUserEnglish = rawName || englishFallback;
+    // Fix for Anonymous users in both languages
+    const finalUserDutch = rawName || "Een Iraanse inwoner in Nederland";
+    const finalUserEnglish = rawName || "An Iranian resident in the Netherlands";
 
-    let template = (emails[vKey] || emails["Version 1"]);
-    let body = template.replace(/\[NAME\]/g, pName);
-    body = body.replace("[USER]", finalUserDutch);
-    body = body.replace("[USER]", finalUserEnglish);
-    body = body.replace(/\[CITY\]/g, cityVal);
+    // Build Dutch Body
+    let body = campaignData[topic].bodies[vKey];
+    body = body.replace(/\[NAME\]/g, pName).replace(/\[USER\]/g, finalUserDutch).replace(/\[CITY\]/g, cityVal);
 
-    const allEmails = politicians[pKey].join("; ");
-    document.getElementById("recipient").value = allEmails;
-    document.getElementById("subject").value = emailSubjects[vKey];
+    // Build English Translation Body
+    let trans = campaignData[topic].translations[vKey];
+    trans = trans.replace(/\[NAME\]/g, pName).replace(/\[USER\]/g, finalUserEnglish).replace(/\[CITY\]/g, cityVal);
+
+    document.getElementById("recipient").value = politicians[pKey].join("; ");
+    document.getElementById("subject").value = campaignData[topic].subjects[vKey];
     document.getElementById("output").value = body;
+    
+    // UI Update for Translation Box
+    document.getElementById("translation-area").style.display = "block";
+    document.getElementById("trans-subject").innerText = campaignData[topic].subjectsTrans[vKey];
+    document.getElementById("translation-text").innerText = trans;
 
     alert("Generated! Now click Open Email or Copy.");
 }
 
-function triggerMailto(url) {
-    window.location.href = url;
-}
-
 function openMail(mode) {
-    const pKey = polDrop.value;
-    const allEmails = politicians[pKey]; 
-    const to = allEmails[0];
-    
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const separator = (mode === 'mobile' || isMobile) ? "," : ";";
-    const cc = allEmails.slice(1).join(separator);
-
     const sub = document.getElementById("subject").value;
+    if (!sub) return alert("Generate content first!");
+    const pKey = polDrop.value;
+    const allEmails = politicians[pKey];
+    const to = allEmails[0];
+    const separator = (mode === 'mobile') ? "," : ";";
+    const cc = allEmails.slice(1).join(separator);
     const body = document.getElementById("output").value;
-
-    if (!sub) return alert("Please generate email first!");
-
-    const mailtoUrl = `mailto:${encodeURIComponent(to)}?to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
-
-    if (mode === 'mobile') {
-        triggerMailto(mailtoUrl);
-        recordAction('Mobile Click');
-    } else {
-        triggerMailto(mailtoUrl);
-        recordAction('Web Click');
-    }
+    const mailtoUrl = `mailto:${encodeURIComponent(to)}?cc=${encodeURIComponent(cc)}&subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+    recordAction(mode === 'mobile' ? 'Mobile Click' : 'Web Click');
 }
 
 function copyAll() {
-    const r = document.getElementById("recipient").value;
     const s = document.getElementById("subject").value;
-    const b = document.getElementById("output").value;
-    if (!s) return alert("Generate email first!");
-    navigator.clipboard.writeText(`To: ${r}\nSubject: ${s}\n\n${b}`);
+    if (!s) return alert("Generate content first!");
+    navigator.clipboard.writeText(`To: ${document.getElementById("recipient").value}\nSubject: ${s}\n\n${document.getElementById("output").value}`);
     recordAction('Copy All');
     alert("Copied to clipboard!");
 }
 
 let myChart;
 async function updateChart() {
+    const topic = document.getElementById("topic").value;
     try {
-        const { data, error } = await supabaseClient.from('email_stats').select('politician_name, version_name');
-        if (error) throw error;
-        
+        const { data } = await supabaseClient.from('email_stats').select('politician_name, version_name').eq('topic', topic);
         const labels = Object.keys(politicians);
-        const versions = Object.keys(emailSubjects);
+        const versions = Object.keys(campaignData[topic].subjects);
         const colors = ['#2b6cb0', '#4299e1', '#63b3ed', '#90cdf4', '#bee3f8'];
-        
         const datasets = versions.map((v, i) => ({
             label: v,
             data: labels.map(p => data ? data.filter(r => r.politician_name === p && r.version_name === v).length : 0),
             backgroundColor: colors[i]
         }));
-
         const ctx = document.getElementById('statsChart').getContext('2d');
         if (myChart) myChart.destroy();
-        
         myChart = new Chart(ctx, {
             type: 'bar',
-            data: { 
-                labels: labels.map(l => l.split(' (')[0]), 
-                datasets: datasets 
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: { padding: { bottom: 120, top: 20 } },
-                plugins: {
-                    legend: { display: true, position: 'top', labels: { color: '#1e293b' } }
-                },
-                scales: {
-                    x: { stacked: true, ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, font: { size: 11 }, color: '#1e293b' } },
-                    y: { stacked: true, beginAtZero: true, ticks: { color: '#1e293b' } }
-                }
-            }
+            data: { labels: labels.map(l => l.split(' (')[0]), datasets: datasets },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
         });
     } catch (e) { console.error(e); }
 }
-window.onload = updateChart;
+
+window.onload = updateUiForTopic;
 </script>
 </body>
 </html>
